@@ -9,6 +9,24 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.12.0" />
+    <PackageReference Include="Clawfoot.Extensions.Newtonsoft" Version="0.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="bin\Debug\net7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net7.0\files\LessSimpleExample1.json" />
+    <None Include="bin\Debug\net7.0\files\MoreMethodsAnimExample.json" />
+    <None Include="bin\Debug\net7.0\files\VerySimpleExample.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Debug\net7.0\files\HelloMessage.json" />
+    <Content Include="bin\Debug\net7.0\files\HelloMessageImproved1.json" />
+    <Content Include="bin\Debug\net7.0\files\HelloMessageImproved2.json" />
+    <Content Include="bin\Debug\net7.0\files\SequenceSingleClass.json" />
   </ItemGroup>
 
 </Project>

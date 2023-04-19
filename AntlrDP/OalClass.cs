@@ -4,7 +4,7 @@ public class OalClass
 {
     public string Id { get; set; }
     public string Name { get; set; }
-    public string Code { get; set; }
 
-    public List<OalClassMethod> OalClassMethods = new();
+    public readonly List<OalClassMethod> OalClassMethods = new();
+    
 }

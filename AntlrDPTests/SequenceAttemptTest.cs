@@ -1,5 +1,6 @@
 using Antlr4.Runtime;
 using AntlrDP;
+using AntlrDP.AnimArchAnimationClasses;
 
 namespace AntlrDPTests;
 
@@ -52,15 +53,6 @@ public class SequenceAttemptTest
     }
 
     [TestMethod]
-    public void TestSequenceSingleClass()
-    {
-        string json = File.ReadAllText("files/SequenceSingleClass.json");
-        var visitor = Setup(json);
-
-        Assert.AreEqual("create object instance MojaTrieda_inst of MojaTrieda;\n", visitor.OalClass.Code);
-    }
-
-    [TestMethod]
     public void TestSequenceHelloMessage()
     {
         string json = File.ReadAllText("files/HelloMessage.json");
@@ -102,7 +94,7 @@ public class SequenceAttemptTest
 
         Assert.AreEqual(visitor.OalProgram.OalClasses[0], visitor.OalProgram.OalClassMethods[0].SenderOalClass);
     }
-    
+
     [TestMethod]
     public void TestReceiverClassObjectInOalMethod()
     {
@@ -111,7 +103,7 @@ public class SequenceAttemptTest
 
         Assert.AreEqual(visitor.OalProgram.OalClasses[1], visitor.OalProgram.OalClassMethods[0].ReceiverOalClass);
     }
-    
+
     [TestMethod]
     public void TestMethodInClasses()
     {
@@ -120,9 +112,8 @@ public class SequenceAttemptTest
 
         Assert.AreEqual(visitor.OalProgram.OalClassMethods[0], visitor.OalProgram.OalClasses[0].OalClassMethods[0]);
         Assert.AreEqual(0, visitor.OalProgram.OalClasses[1].OalClassMethods.Count);
-
     }
-    
+
     [TestMethod]
     public void TestCodeInOalClass()
     {
@@ -132,7 +123,7 @@ public class SequenceAttemptTest
         Assert.AreEqual("create object instance Class2_inst of Class2;\nClass2_inst.hello();\n"
             , visitor.OalProgram.OalClasses[0].OalClassMethods[0].Code);
     }
-    
+
     [TestMethod]
     public void TestCodeInProgramWithSimpleHello()
     {
@@ -142,7 +133,7 @@ public class SequenceAttemptTest
         Assert.AreEqual("create object instance Class2_inst of Class2;\nClass2_inst.hello();\n"
             , visitor.OalProgram.Code);
     }
-    
+
     [TestMethod]
     public void TestCodeInProgramWithImprovedHello()
     {
@@ -152,5 +143,44 @@ public class SequenceAttemptTest
         Assert.AreEqual("create object instance Class2_inst of Class2;\nClass2_inst.helloClass2();\n" +
                         "create object instance Class3_inst of Class3;\nClass3_inst.helloClass3();\n"
             , visitor.OalProgram.Code);
+    }
+
+    [TestMethod]
+    public void TestCodeInProgramWithMoreMethods()
+    {
+        var json = File.ReadAllText("files/HelloMessageImproved2.json");
+        var visitor = Setup(json);
+
+        Assert.AreEqual("create object instance Class2_inst of Class2;\nClass2_inst.helloClass2();\n" +
+                        "create object instance Class3_inst of Class3;\nClass3_inst.helloClass3();\n" +
+                        "create object instance Class1_inst of Class1;\nClass1_inst.helloClass1();\n"
+            , visitor.OalProgram.Code);
+    }
+
+    [TestMethod]
+    public void TestCodesInMultipleMethods()
+    {
+        var json = File.ReadAllText("files/HelloMessageImproved2.json");
+        var visitor = Setup(json);
+
+        Assert.AreEqual("create object instance Class2_inst of Class2;\nClass2_inst.helloClass2();\n"
+            , visitor.OalProgram.OalClasses[0].OalClassMethods[0].Code);
+        Assert.AreEqual("create object instance Class3_inst of Class3;\nClass3_inst.helloClass3();\n"
+            , visitor.OalProgram.OalClasses[1].OalClassMethods[0].Code);
+        Assert.AreEqual("create object instance Class1_inst of Class1;\nClass1_inst.helloClass1();\n"
+            , visitor.OalProgram.OalClasses[2].OalClassMethods[0].Code);
+    }
+
+    [TestMethod]
+    public void TestAnimArchAnimationObject()
+    {
+        var json = File.ReadAllText("files/HelloMessageImproved2.json");
+        var visitor = Setup(json);
+
+        const string jsonExpected =
+            "{\"Code\":\"create object instance Class2_inst of Class2;\\nClass2_inst.helloClass2();\\ncreate object instance Class3_inst of Class3;\\nClass3_inst.helloClass3();\\ncreate object instance Class1_inst of Class1;\\nClass1_inst.helloClass1();\\n\",\"AnimationName\":null,\"MethodsCodes\":[{\"Name\":\"Class1\",\"Methods\":[{\"Name\":\"helloClass2\",\"Code\":\"create object instance Class2_inst of Class2;\\nClass2_inst.helloClass2();\\n\"}]},{\"Name\":\"Class2\",\"Methods\":[{\"Name\":\"helloClass3\",\"Code\":\"create object instance Class3_inst of Class3;\\nClass3_inst.helloClass3();\\n\"}]},{\"Name\":\"Class3\",\"Methods\":[{\"Name\":\"helloClass1\",\"Code\":\"create object instance Class1_inst of Class1;\\nClass1_inst.helloClass1();\\n\"}]}]}";
+        var jsonGenerated =
+            Newtonsoft.Json.JsonConvert.SerializeObject(visitor.OalProgram.CreateAnimArchAnimationObject());
+        Assert.AreEqual(jsonExpected, jsonGenerated);
     }
 }

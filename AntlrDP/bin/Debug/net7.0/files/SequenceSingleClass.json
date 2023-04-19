@@ -1,0 +1,51 @@
+[
+  {
+    "XmiId": "MjExNDU2dW1sOkludGVyYWN0aW9uMDMvMTUvMjAyMyAxMDozNTo0Mi41ODc=",
+    "XmiType": "uml:Interaction",
+    "lifeline": [
+      {
+        "XmiIdRef": "MTAyNTA3MzE1MnVtbDpMaWZlbGluZTAzLzE1LzIwMjMgMTA6MzU6NDIuNTg3"
+      }
+    ],
+    "message": [],
+    "fragment": [],
+    "formalGate": [],
+    "covered": [
+      {
+        "XmiIdRef": "MTAyNTA3MzE1MnVtbDpMaWZlbGluZTAzLzE1LzIwMjMgMTA6MzU6NDIuNTg3"
+      }
+    ],
+    "generalOrdering": [],
+    "name": "DiagramSingleClass",
+    "ownedElement": [
+      {
+        "XmiIdRef": "MTAyNTA3MzE1MnVtbDpMaWZlbGluZTAzLzE1LzIwMjMgMTA6MzU6NDIuNTg3"
+      }
+    ],
+    "ownedComment": [],
+    "diElement": [],
+    "dgElement": [],
+    "ChildXmiElement": []
+  },
+  {
+    "XmiId": "MTAyNTA3MzE1MnVtbDpMaWZlbGluZTAzLzE1LzIwMjMgMTA6MzU6NDIuNTg3",
+    "XmiType": "uml:Lifeline",
+    "coveredBy": [
+      {
+        "XmiIdRef": "MjExNDU2dW1sOkludGVyYWN0aW9uMDMvMTUvMjAyMyAxMDozNTo0Mi41ODc="
+      }
+    ],
+    "interaction": {
+      "XmiIdRef": "MjExNDU2dW1sOkludGVyYWN0aW9uMDMvMTUvMjAyMyAxMDozNTo0Mi41ODc="
+    },
+    "name": "MojaTrieda",
+    "owner": {
+      "XmiIdRef": "MjExNDU2dW1sOkludGVyYWN0aW9uMDMvMTUvMjAyMyAxMDozNTo0Mi41ODc="
+    },
+    "ownedElement": [],
+    "ownedComment": [],
+    "diElement": [],
+    "dgElement": [],
+    "ChildXmiElement": []
+  }
+]

@@ -1,4 +1,6 @@
-﻿namespace AntlrDP;
+﻿using AntlrDP.AnimArchAnimationClasses;
+
+namespace AntlrDP;
 
 public class OalProgram
 {
@@ -40,7 +42,6 @@ public class OalProgram
         var receiverOalClass = OalClasses.Find(oalClass => oalClass.Id == receiverOalClassId);
         if (receiverOalClass == null) return;
         classMethod.ReceiverOalClass = receiverOalClass;
-        // receiverOalClass.OalClassMethods.Add(classMethod);
     }
 
     public void SetCodeInClasses()
@@ -86,5 +87,47 @@ public class OalProgram
         }
 
         Code = code;
+    }
+
+    public AnimArchAnimation CreateAnimArchAnimationObject()
+    {
+        var methodCodes = CreateAnimMethodsCodes();
+        return new AnimArchAnimation()
+        {
+            Code = Code,
+            MethodsCodes = methodCodes
+            
+        };
+    }
+
+    private List<MethodsCode> CreateAnimMethodsCodes()
+    {
+        var methodCodes = new List<MethodsCode>();
+        foreach (var oalClass in OalClasses)
+        {
+            var methodCode = new MethodsCode
+            {
+                Name = oalClass.Name
+            };
+            var animMethods = new List<Method>();
+            foreach (var oalClassMethod in oalClass.OalClassMethods)
+            {
+                var animMethod = new Method()
+                {
+                    Name = oalClassMethod.Name,
+                    Code = oalClassMethod.Code
+                };
+                animMethods.Add(animMethod);
+            }
+
+            methodCode.Methods = animMethods;
+            if (animMethods.Count == 0)
+            {
+                continue;
+            }
+            methodCodes.Add(methodCode);
+        }
+
+        return methodCodes;
     }
 }

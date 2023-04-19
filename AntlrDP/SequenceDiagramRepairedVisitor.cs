@@ -4,12 +4,10 @@ namespace AntlrDP;
 
 public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 {
-    public readonly List<SequenceJsonAttempt> Attempts = new List<SequenceJsonAttempt>();
     public SequenceJsonAttempt Attempt = new();
     public string Message = "";
-    public OalClass OalClass = new();
-    public List<OalClass> OalClasses = new();
-    public OalProgram OalProgram = new();
+    public readonly List<OalClass> OalClasses = new();
+    public readonly OalProgram OalProgram = new();
 
     public override object VisitPair(SequenceDiagramParser.PairContext context)
     {
@@ -22,7 +20,6 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 
         Attempt = new SequenceJsonAttempt()
             { Name = name.GetText().Replace("\"", ""), Value = val.GetText().Replace("\"", "") };
-        Attempts.Add(Attempt);
         return base.VisitPair(context);
     }
 
@@ -42,7 +39,6 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 
         if (pair.Any(val => val.lifeline() != null))
         {
-            OalClass = CreateOalClass(pair);
             OalClasses.Add(CreateOalClass(pair));
             var oalClass = CreateOalClass(pair);
             OalProgram.OalClasses.Add(oalClass);
@@ -66,7 +62,7 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
         var nameContext = pairContexts.First(val => val.name() != null).name();
         var name = nameContext.value().GetText().Replace("\"", "");
-        var oalClass = new OalClass() { Id = id, Name = name, Code = CreateCodeForCreationOfOalClass(name) };
+        var oalClass = new OalClass() { Id = id, Name = name};
         return oalClass;
     }
 
@@ -104,21 +100,14 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return "";
     }
 
-    private OalOccurrenceSpecification CreateOccurenceSpecification(SequenceDiagramParser.PairContext[] pairContexts)
+    private static OalOccurrenceSpecification CreateOccurenceSpecification(SequenceDiagramParser.PairContext[] pairContexts)
     {
         var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
         var coveredByContext =
             pairContexts.First(val => val.covered() != null).covered().value().arr().value()[0].obj().pair()[0]
                 .xmiIdRef().value().GetText().Replace("\"", "");
-        // var coveredPairContexts = coveredByContext.value().obj().pair();
-        // var coveredByReferenceId = GetXmiIdRef(coveredPairContexts);
-        return new OalOccurrenceSpecification() { Id = id, RefrenceIdOfCoveredObject = coveredByContext };
-    }
-
-    private static string CreateCodeForCreationOfOalClass(String className)
-    {
-        var nameOfInstance = className + "_inst";
-        return "create object instance " + nameOfInstance + " of " + className + ";\n";
+        
+        return new OalOccurrenceSpecification { Id = id, RefrenceIdOfCoveredObject = coveredByContext };
     }
 
     public override object VisitJson(SequenceDiagramParser.JsonContext context)
@@ -127,10 +116,6 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         OalProgram.SetOalClassesInMethods();
         OalProgram.SetCodeInClasses();
         OalProgram.SetProgramCode();
-        // foreach (var classMethod in OalProgram.OalClassMethods)
-        // {
-        //     classMethod.setCode();
-        // }
 
         return null;
     }
