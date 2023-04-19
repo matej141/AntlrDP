@@ -1,0 +1,19 @@
+﻿{
+  "Code": "create object instance class2_1 of Class2;\nclass2_1.hello();\ncreate object instance class2_1 of Class2;\nclass2_1.hello02();\ncreate object instance class3_1 of Class3;\nclass3_1.hello();\ncreate object instance class3_1 of Class3;\nclass3_1.hello();\n",
+  "AnimationName": "helloImproved1MoreMethodsAnim",
+  "MethodsCodes": [
+    {
+      "Name": "Class1",
+      "Methods": [
+        {
+          "Name": "hello",
+          "Code": "create object instance class2_1 of Class2;\nclass2_1.hello();\ncreate object instance class3_1 of Class3;\nclass3_1.hello();\n"
+        },
+        {
+          "Name": "hello02",
+          "Code": "create object instance class2_1 of Class2;\nclass2_1.hello02();\ncreate object instance class3_1 of Class3;\nclass3_1.hello();\n"
+        }
+      ]
+    }
+  ]
+}

@@ -25,7 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="bin\Debug\net7.0\files\HelloMessageImproved2.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessage.json" />
+    <Content Include="bin\Debug\net7.0\files\HelloMessageImproved1.json" />
     <Content Include="bin\Debug\net7.0\files\SequenceSingleClass.json" />
   </ItemGroup>
 

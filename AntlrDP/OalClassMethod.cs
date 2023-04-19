@@ -6,4 +6,13 @@ public class OalClassMethod
     public string Code { get; set; }
     public string SenderOccurrenceId { get; set; }
     public string ReceiverOccurrenceId { get; set; }
+    public OalClass SenderOalClass { get; set; }
+    
+    public OalClass ReceiverOalClass { get; set; }
+
+    public void setCode()
+    {
+        if (SenderOalClass == null) return;
+        Code = SenderOalClass.Name + "." + Name + "()\n";
+    }
 }

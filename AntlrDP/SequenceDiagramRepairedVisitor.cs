@@ -45,16 +45,17 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
             OalClass = CreateOalClass(pair);
             OalClasses.Add(CreateOalClass(pair));
             var oalClass = CreateOalClass(pair);
-            OalProgram.Classes.Add(oalClass);
+            OalProgram.OalClasses.Add(oalClass);
         }
 
         if (pair.Any(val => val.message() != null))
         {
-            OalProgram.ClassMethods.Add(CreateOalClassMethod(pair));
+            OalProgram.OalClassMethods.Add(CreateOalClassMethod(pair));
         }
 
         if (pair.Any(val => val.occurenceSpecification() != null))
         {
+            OalProgram.OccurrenceSpecifications.Add(CreateOccurenceSpecification(pair));
         }
 
         return base.VisitObj(context);
@@ -69,7 +70,7 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return oalClass;
     }
 
-    private OalClassMethod CreateOalClassMethod(SequenceDiagramParser.PairContext[] pairContexts)
+    private static OalClassMethod CreateOalClassMethod(SequenceDiagramParser.PairContext[] pairContexts)
     {
         var name = pairContexts.First(val => val.name() != null).name().value().GetText().Replace("\"", "");
         var receiveEventId = GetReceiverOccurrenceId(pairContexts);
@@ -78,7 +79,7 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
             { Name = name, ReceiverOccurrenceId = receiveEventId, SenderOccurrenceId = sendEventId };
     }
 
-    private string GetReceiverOccurrenceId(SequenceDiagramParser.PairContext[] pairContexts)
+    private static string GetReceiverOccurrenceId(SequenceDiagramParser.PairContext[] pairContexts)
     {
         var receiveEventIdPairContexts =
             pairContexts.First(val => val.receiveEvent() != null).receiveEvent().value().obj().pair();
@@ -86,14 +87,14 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return GetXmiIdRef(receiveEventIdPairContexts);
     }
 
-    private string GetSenderOccurrenceId(SequenceDiagramParser.PairContext[] pairContexts)
+    private static string GetSenderOccurrenceId(SequenceDiagramParser.PairContext[] pairContexts)
     {
         var senderEventIdPairContexts =
             pairContexts.First(val => val.sendEvent() != null).sendEvent().value().obj().pair();
         return GetXmiIdRef(senderEventIdPairContexts);
     }
 
-    private string GetXmiIdRef(SequenceDiagramParser.PairContext[] pairContexts)
+    private static string GetXmiIdRef(SequenceDiagramParser.PairContext[] pairContexts)
     {
         if (pairContexts.Any(val => val.xmiIdRef() != null))
         {
@@ -103,9 +104,34 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return "";
     }
 
+    private OalOccurrenceSpecification CreateOccurenceSpecification(SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
+        var coveredByContext =
+            pairContexts.First(val => val.covered() != null).covered().value().arr().value()[0].obj().pair()[0]
+                .xmiIdRef().value().GetText().Replace("\"", "");
+        // var coveredPairContexts = coveredByContext.value().obj().pair();
+        // var coveredByReferenceId = GetXmiIdRef(coveredPairContexts);
+        return new OalOccurrenceSpecification() { Id = id, RefrenceIdOfCoveredObject = coveredByContext };
+    }
+
     private static string CreateCodeForCreationOfOalClass(String className)
     {
         var nameOfInstance = className + "_inst";
         return "create object instance " + nameOfInstance + " of " + className + ";\n";
+    }
+
+    public override object VisitJson(SequenceDiagramParser.JsonContext context)
+    {
+        VisitChildren(context);
+        OalProgram.SetOalClassesInMethods();
+        OalProgram.SetCodeInClasses();
+        OalProgram.SetProgramCode();
+        // foreach (var classMethod in OalProgram.OalClassMethods)
+        // {
+        //     classMethod.setCode();
+        // }
+
+        return null;
     }
 }
