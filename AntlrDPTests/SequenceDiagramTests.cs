@@ -1,11 +1,10 @@
 using Antlr4.Runtime;
 using AntlrDP;
-using AntlrDP.AnimArchAnimationClasses;
 
 namespace AntlrDPTests;
 
 [TestClass]
-public class SequenceAttemptTest
+public class SequenceDiagramTests
 {
     private SequenceDiagramRepairedVisitor Setup(string input)
     {
@@ -14,7 +13,7 @@ public class SequenceAttemptTest
         return visitor;
     }
 
-    private SequenceDiagramParser SetupParser(string input)
+    private static SequenceDiagramParser SetupParser(string input)
     {
         var inputStream = new AntlrInputStream(input);
         var speakLexer = new SequenceDiagramLexer(inputStream);

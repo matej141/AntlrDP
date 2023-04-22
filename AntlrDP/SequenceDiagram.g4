@@ -1,5 +1,4 @@
 
-/** Taken from "The Definitive ANTLR 4 Reference" by Terence Parr */
 
 // Derived from https://json.org
 // https://andreabergia.com/blog/2015/02/a-grammar-for-json-with-antlr-v4/

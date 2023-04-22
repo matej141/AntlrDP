@@ -1,6 +1,4 @@
-﻿using Antlr4.Runtime.Tree;
-
-namespace AntlrDP;
+﻿namespace AntlrDP;
 
 public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 {
