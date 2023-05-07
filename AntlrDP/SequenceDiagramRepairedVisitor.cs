@@ -29,27 +29,27 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 
     public override object VisitObj(SequenceDiagramParser.ObjContext context)
     {
-        var pair = context.pair();
-        if (pair == null)
+        var pairs = context.pair();
+        if (pairs == null)
         {
             return base.VisitObj(context);
         }
 
-        if (pair.Any(val => val.lifeline() != null))
+        if (pairs.Any(val => val.lifeline() != null))
         {
-            OalClasses.Add(CreateOalClass(pair));
-            var oalClass = CreateOalClass(pair);
+            OalClasses.Add(CreateOalClass(pairs));
+            var oalClass = CreateOalClass(pairs);
             OalProgram.OalClasses.Add(oalClass);
         }
 
-        if (pair.Any(val => val.message() != null))
+        if (pairs.Any(val => val.message() != null))
         {
-            OalProgram.OalClassMethods.Add(CreateOalClassMethod(pair));
+            OalProgram.OalClassMethods.Add(CreateOalClassMethod(pairs));
         }
 
-        if (pair.Any(val => val.occurenceSpecification() != null))
+        if (pairs.Any(val => val.occurenceSpecification() != null))
         {
-            OalProgram.OccurrenceSpecifications.Add(CreateOccurenceSpecification(pair));
+            OalProgram.OccurrenceSpecifications.Add(CreateOccurenceSpecification(pairs));
         }
 
         return base.VisitObj(context);

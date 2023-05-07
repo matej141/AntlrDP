@@ -2,7 +2,6 @@
 
 namespace AntlrDP
 {
-    // inspiracia z: https://tomassetti.me/getting-started-with-antlr-in-csharp/
     class Program
     {
         private static void Main(string[] args)
