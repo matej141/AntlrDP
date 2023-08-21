@@ -29,6 +29,8 @@
     <Content Include="bin\Debug\net7.0\files\HelloMessage.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessageImproved1.json" />
     <Content Include="bin\Debug\net7.0\files\SequenceSingleClass.json" />
+    <Content Include="bin\Debug\net7.0\files\SimpleALT.json" />
+    <Content Include="bin\Debug\net7.0\files\SimpleLoop.json" />
   </ItemGroup>
 
 </Project>

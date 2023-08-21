@@ -6,7 +6,7 @@ namespace AntlrDP
     {
         private static void Main(string[] args)
         {
-            var json = File.ReadAllText("files/HelloMessageImproved1.json");
+            var json = File.ReadAllText("files/SimpleLoop.json");
             var inputStream = new AntlrInputStream(json);
             var speakLexer = new SequenceDiagramLexer(inputStream);
             var commonTokenStream = new CommonTokenStream(speakLexer);

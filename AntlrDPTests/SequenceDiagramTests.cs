@@ -182,4 +182,17 @@ public class SequenceDiagramTests
             Newtonsoft.Json.JsonConvert.SerializeObject(visitor.OalProgram.CreateAnimArchAnimationObject());
         Assert.AreEqual(jsonExpected, jsonGenerated);
     }
+
+    [TestMethod]
+    public void TestDiagramWithLoopFragment()
+    {
+        var json = File.ReadAllText("files/SimpleALT.json");
+        var visitor = Setup(json);
+        
+        const string jsonExpected =
+            "{\"Code\":\"create object instance Class2_inst of Class2;\\nwhile (a>5)\\r\\nClass2_inst.hello();\\n\",\"AnimationName\":null,\"MethodsCodes\":[{\"Name\":\"Class1\",\"Methods\":[{\"Name\":\"hello\",\"Code\":\"create object instance Class2_inst of Class2;\\nwhile (a>5)\\r\\nClass2_inst.hello();\\n\"}]}]}";
+        var jsonGenerated =
+            Newtonsoft.Json.JsonConvert.SerializeObject(visitor.OalProgram.CreateAnimArchAnimationObject());
+        Assert.AreEqual(jsonExpected, jsonGenerated);
+    }
 }

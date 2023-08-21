@@ -21,6 +21,16 @@ pair
    | covered
    | receiveEvent
    | sendEvent
+   | combinedFragment
+   | interactionOperator
+   | interactionOperand
+   | guard
+   | interactionConstraint
+   | specification
+   | opaqueExpression
+   | operand
+   | fragments
+   | body
    ;
 
 arr
@@ -61,7 +71,35 @@ message
 occurenceSpecification
     : STRING ':' '"uml:OccurrenceSpecification"'
     ;
-   
+
+combinedFragment
+    : STRING ':' '"uml:CombinedFragment"'
+    ;
+
+interactionOperand
+    : STRING ':' '"uml:InteractionOperand"'
+    ;
+    
+guard
+    : '"guard"' ':' value
+    ;
+
+fragments
+    : '"fragment"' ':' value
+    ;
+    
+specification
+    : '"specification"' ':' value
+    ;
+
+interactionConstraint
+    : STRING ':' '"uml:InteractionConstraint"'
+    ;
+
+opaqueExpression
+    : STRING ':' '"uml:OpaqueExpression"'
+    ;
+
 covered
     : '"covered"' ':' value
     ;
@@ -72,6 +110,18 @@ receiveEvent
     
 sendEvent
     : '"sendEvent"' ':' value
+    ;
+
+body
+    : '"body"' ':' value
+    ;
+ 
+interactionOperator
+    : '"interactionOperator"' ':' value
+    ;
+
+operand
+    : '"operand"' ':' value
     ;
 
 //NAME

@@ -23,10 +23,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="bin\Debug\net7.0\files\HelloLoop1Formatted.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessage.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessageImproved1.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessageImproved2.json" />
     <Content Include="bin\Debug\net7.0\files\SequenceSingleClass.json" />
+    <Content Include="bin\Debug\net7.0\files\SimpleALT.json" />
+    <Content Include="bin\Debug\net7.0\files\SimpleLoop.json" />
+    <Content Include="bin\Debug\net7.0\files\SimpleLoopPlusMessage.json" />
   </ItemGroup>
 
 </Project>

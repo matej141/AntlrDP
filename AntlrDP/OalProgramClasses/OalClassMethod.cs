@@ -8,4 +8,5 @@ public class OalClassMethod
     public string ReceiverOccurrenceId { get; set; }
     public OalClass SenderOalClass { get; set; }
     public OalClass ReceiverOalClass { get; set; }
+    public List<String> Constraints = new List<string>();
 }

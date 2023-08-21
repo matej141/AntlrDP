@@ -52,6 +52,26 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
             OalProgram.OccurrenceSpecifications.Add(CreateOccurenceSpecification(pairs));
         }
 
+        if (pairs.Any(val => val.combinedFragment() != null))
+        {
+            OalProgram.CombinedFragments.Add(CreateCombinedFragment(pairs));
+        }
+
+        if (pairs.Any(val => val.interactionOperand() != null))
+        {
+            OalProgram.InteractionOperands.Add(CreateInteractionOperand(pairs));
+        }
+
+        if (pairs.Any(val => val.interactionConstraint() != null))
+        {
+            OalProgram.InteractionConstraints.Add(CreateInteractionConstraint(pairs));
+        }
+
+        if (pairs.Any(val => val.opaqueExpression() != null))
+        {
+            OalProgram.OpaqueExpressions.Add(CreateOpaqueExpression(pairs));
+        }
+
         return base.VisitObj(context);
     }
 
@@ -60,7 +80,7 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
         var nameContext = pairContexts.First(val => val.name() != null).name();
         var name = nameContext.value().GetText().Replace("\"", "");
-        var oalClass = new OalClass() { Id = id, Name = name};
+        var oalClass = new OalClass() { Id = id, Name = name };
         return oalClass;
     }
 
@@ -88,6 +108,21 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return GetXmiIdRef(senderEventIdPairContexts);
     }
 
+    private static string GetGuardId(SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var guardIdPairContexts =
+            pairContexts.First(val => val.guard() != null).guard().value().obj().pair();
+        return GetXmiIdRef(guardIdPairContexts);
+    }
+
+    private static string GetSpecificationId(SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var guardIdPairContexts =
+            pairContexts.First(val => val.specification() != null).specification().value().obj().pair();
+        return GetXmiIdRef(guardIdPairContexts);
+    }
+
+
     private static string GetXmiIdRef(SequenceDiagramParser.PairContext[] pairContexts)
     {
         if (pairContexts.Any(val => val.xmiIdRef() != null))
@@ -98,14 +133,64 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return "";
     }
 
-    private static OalOccurrenceSpecification CreateOccurenceSpecification(SequenceDiagramParser.PairContext[] pairContexts)
+    private static OalOccurrenceSpecification CreateOccurenceSpecification(
+        SequenceDiagramParser.PairContext[] pairContexts)
     {
         var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
         var coveredByContext =
             pairContexts.First(val => val.covered() != null).covered().value().arr().value()[0].obj().pair()[0]
                 .xmiIdRef().value().GetText().Replace("\"", "");
-        
         return new OalOccurrenceSpecification { Id = id, RefrenceIdOfCoveredObject = coveredByContext };
+    }
+
+    private static OalCombinedFragment CreateCombinedFragment(SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
+        var interactionOperator = pairContexts.First(val => val.interactionOperator() != null).interactionOperator()
+            .value().GetText().Replace("\"", "");
+        var operandsContext =
+            pairContexts.First(val => val.operand() != null).operand().value().arr().value();
+        var operands = new List<String>();
+        foreach (var operand in operandsContext)
+        {
+            operands.Add(operand.obj().pair()[0]
+                .xmiIdRef().value().GetText().Replace("\"", ""));
+        }
+
+        return new OalCombinedFragment { Id = id, InteractionOperatorId = interactionOperator, Operands = operands };
+    }
+
+    private static OalInteractionOperand CreateInteractionOperand(SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
+        var guardId = GetGuardId(pairContexts);
+        var fragmentsContext =
+            pairContexts.First(val => val.fragments() != null).fragments().value().arr().value();
+        var fragments = new List<String>();
+        foreach (var fragment in fragmentsContext)
+        {
+            fragments.Add(fragment.obj().pair()[0]
+                .xmiIdRef().value().GetText().Replace("\"", ""));
+        }
+
+        return new OalInteractionOperand { Id = id, GuardId = guardId, Fragments = fragments };
+    }
+
+    private static OalInteractionConstraint CreateInteractionConstraint(
+        SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
+        var specificationId = GetSpecificationId(pairContexts);
+
+        return new OalInteractionConstraint { Id = id, SpecificationId = specificationId };
+    }
+
+    private static OalOpaqueExpression CreateOpaqueExpression(SequenceDiagramParser.PairContext[] pairContexts)
+    {
+        var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
+        var body = pairContexts.First(val => val.body() != null).body().value().GetText().Replace("\"", "");
+
+        return new OalOpaqueExpression { Id = id, Body = body };
     }
 
     public override object VisitJson(SequenceDiagramParser.JsonContext context)
