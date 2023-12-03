@@ -25,9 +25,29 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="bin\Debug\net7.0\files\Crazy.json" />
+    <Content Include="bin\Debug\net7.0\files\FowlerUMLDistilled.json" />
+    <Content Include="bin\Debug\net7.0\files\FowlerUMLDistilledImproved.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessageImproved2.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessage.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessageImproved1.json" />
+    <Content Include="bin\Debug\net7.0\files\Hello3Classes.json" />
+    <Content Include="bin\Debug\net7.0\files\HelloMiddleSelfMessage.json" />
+    <Content Include="bin\Debug\net7.0\files\HelloSelfMessage.json" />
+    <Content Include="bin\Debug\net7.0\files\HelloTwoMessages.json" />
+    <Content Include="bin\Debug\net7.0\files\NestedAltInLoop.json" />
+    <Content Include="bin\Debug\net7.0\files\NestedAltInLoopWithMessages.json" />
+    <Content Include="bin\Debug\net7.0\files\NestedLoopAndAltInLoop.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltBeforeAfterMessages.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltDifferentDirectionsAfterAlt.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltMoreMessagesInCondition.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltOneCondition.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltOppositeDirectionMessage.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltTwoConditions.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltTwoRespondMessagesAfterAlt.json" />
+    <Content Include="bin\Debug\net7.0\files\OneAltWithElse.json" />
+    <Content Include="bin\Debug\net7.0\files\OneHelloOneReturn.json" />
+    <Content Include="bin\Debug\net7.0\files\OneLoopBeforeAfterMessages.json" />
     <Content Include="bin\Debug\net7.0\files\SequenceSingleClass.json" />
     <Content Include="bin\Debug\net7.0\files\SimpleALT.json" />
     <Content Include="bin\Debug\net7.0\files\SimpleLoop.json" />

@@ -2,14 +2,28 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\ciern\.nuget\packages\newtonsoft.json\10.0.3\lib\netstandard1.3\Newtonsoft.Json.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6b481b12_002D8e8d_002D4af0_002Dacfb_002Dc3a1b5ba1d0a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestDiagramWithLoopFragment" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;MSTest::86DBDA41-108E-4FAE-9909-872864C50E12::net7.0::AntlrDPTests.SequenceDiagramTests.TestDiagramWithLoopFragment&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ed68a6dc_002Deeed_002D4f6b_002D88b1_002D1cfd7c78e58c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestAttempt" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=738461a9_002D7851_002D40c8_002D990b_002Dd40e4a9454cb/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestSequenceFowlerUmlDestilledMethod" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;MSTest::86DBDA41-108E-4FAE-9909-872864C50E12::net7.0::AntlrDPTests.SequenceDiagramTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7726f4da_002Dfc3b_002D4009_002Da4b4_002Dca6ca1ae30d5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestSequenceFowlerUmlDistilledImprovedFirstMethod" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::86DBDA41-108E-4FAE-9909-872864C50E12::net7.0::AntlrDPTests.SequenceDiagramTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e2a926c8_002D8c3f_002D45e6_002D86df_002D1d4f4f94709a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestSequenceCrazyFirstMethod" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::86DBDA41-108E-4FAE-9909-872864C50E12::net7.0::AntlrDPTests.SequenceDiagramTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	
+	
+	
+	
+	</wpf:ResourceDictionary>

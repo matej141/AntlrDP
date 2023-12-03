@@ -44,7 +44,7 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 
         if (pairs.Any(val => val.message() != null))
         {
-            OalProgram.OalClassMethods.Add(CreateOalClassMethod(pairs));
+            OalProgram.OalMethodCalls.Add(CreateOalMethodCall(pairs));
         }
 
         if (pairs.Any(val => val.occurenceSpecification() != null))
@@ -84,12 +84,12 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
         return oalClass;
     }
 
-    private static OalClassMethod CreateOalClassMethod(SequenceDiagramParser.PairContext[] pairContexts)
+    private static OalMethodCall CreateOalMethodCall(SequenceDiagramParser.PairContext[] pairContexts)
     {
         var name = pairContexts.First(val => val.name() != null).name().value().GetText().Replace("\"", "");
         var receiveEventId = GetReceiverOccurrenceId(pairContexts);
         var sendEventId = GetSenderOccurrenceId(pairContexts);
-        return new OalClassMethod()
+        return new OalMethodCall
             { Name = name, ReceiverOccurrenceId = receiveEventId, SenderOccurrenceId = sendEventId };
     }
 
@@ -173,7 +173,17 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
                 .xmiIdRef().value().GetText().Replace("\"", ""));
         }
 
-        return new OalInteractionOperand { Id = id, GuardId = guardId, Fragments = fragments };
+        var ownedElementsContext =
+            pairContexts.First(val => val.ownedElements() != null).ownedElements().value().arr().value();
+        var ownedElements = new List<String>();
+        foreach (var ownedElement in ownedElementsContext)
+        {
+            ownedElements.Add(ownedElement.obj().pair()[0]
+                .xmiIdRef().value().GetText().Replace("\"", ""));
+        }
+
+        return new OalInteractionOperand
+            { Id = id, GuardId = guardId, Fragments = fragments, OwnedElements = ownedElements };
     }
 
     private static OalInteractionConstraint CreateInteractionConstraint(
@@ -196,8 +206,8 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
     public override object VisitJson(SequenceDiagramParser.JsonContext context)
     {
         VisitChildren(context);
-        OalProgram.SetOalClassesInMethods();
-        OalProgram.SetCodeInClasses();
+        OalProgram.SetOalClassesInMethodCalls();
+        // OalProgram.SetCodeInClasses();
         OalProgram.SetProgramCode();
 
         return null;

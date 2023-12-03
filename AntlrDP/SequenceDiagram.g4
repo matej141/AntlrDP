@@ -123,6 +123,10 @@ interactionOperator
 operand
     : '"operand"' ':' value
     ;
+    
+ownedElements
+    : '"ownedElement"' ':' value
+    ;
 
 //NAME
 //   : '"'~('"')*':name"'

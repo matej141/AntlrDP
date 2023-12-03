@@ -6,5 +6,6 @@ public class OalClass
     public string Name { get; set; }
 
     public readonly List<OalClassMethod> OalClassMethods = new();
+    public readonly List<OalMethodCall> OalMethodCalls = new();
     
 }
