@@ -31,6 +31,7 @@ pair
    | operand
    | fragments
    | body
+   | ownedElements
    ;
 
 arr

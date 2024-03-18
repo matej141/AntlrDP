@@ -876,19 +876,19 @@ public class OalProgram
         };
     }
 
-    private List<MethodsCode> CreateAnimMethodsCodes()
+    private List<AnimationMethodCode> CreateAnimMethodsCodes()
     {
-        var methodCodes = new List<MethodsCode>();
+        var methodCodes = new List<AnimationMethodCode>();
         foreach (var oalClass in OalClasses)
         {
-            var methodCode = new MethodsCode
+            var methodCode = new AnimationMethodCode
             {
                 Name = oalClass.Name
             };
-            var animMethods = new List<Method>();
+            var animMethods = new List<AnimationMethod>();
             foreach (var oalClassMethod in oalClass.OalClassMethods)
             {
-                var animMethod = new Method()
+                var animMethod = new AnimationMethod()
                 {
                     Name = oalClassMethod.Name,
                     Code = oalClassMethod.Code

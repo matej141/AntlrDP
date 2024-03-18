@@ -1,7 +1,7 @@
 ﻿namespace AntlrDP.AnimArchAnimationClasses;
 
-public class MethodsCode
+public class AnimationMethodCode
 {
     public string Name { get; set; }
-    public List<Method> Methods { get; set; }
+    public List<AnimationMethod> Methods { get; set; }
 }

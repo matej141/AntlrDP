@@ -1,6 +1,6 @@
 ﻿namespace AntlrDP;
 
-public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
+public class SequenceDiagramRepairedArchivedVisitor : SequenceDiagramBaseVisitor<object>
 {
     public SequenceJsonAttempt Attempt = new();
     public string Message = "";
@@ -74,6 +74,21 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
 
         return base.VisitObj(context);
     }
+
+    // public override object VisitMessage(SequenceDiagramParser.MessageContext context)
+    // {
+    //     OalProgram.OalMethodCalls.Add(CreateOalMethodCall2(context));
+    //     return base.VisitMessage(context);
+    // }
+    //
+    // private static OalMethodCall CreateOalMethodCall2(SequenceDiagramParser.MessageContext context)
+    // {
+    //     var name = context.name().value().GetText().Replace("\"", "");
+    //     var receiveEventId = context.receiveEvent().xmiIdRef().value().GetText();
+    //     var sendEventId =context.sendEvent().xmiIdRef().value().GetText();
+    //     return new OalMethodCall
+    //         { Name = name, ReceiverOccurrenceId = receiveEventId, SenderOccurrenceId = sendEventId };
+    // }
 
     private static OalClass CreateOalClass(SequenceDiagramParser.PairContext[] pairContexts)
     {
@@ -207,7 +222,6 @@ public class SequenceDiagramRepairedVisitor : SequenceDiagramBaseVisitor<object>
     {
         VisitChildren(context);
         OalProgram.SetOalClassesInMethodCalls();
-        // OalProgram.SetCodeInClasses();
         OalProgram.SetProgramCode();
 
         return null;
