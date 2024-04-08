@@ -4,9 +4,9 @@ using AntlrDP.Translation;
 
 namespace AntlrDP
 {
-    class Program
+    abstract class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             var json = File.ReadAllText("files/Evaluation_files_from_MZ/absFactoryPara.json");
             var inputStream = new AntlrInputStream(json);

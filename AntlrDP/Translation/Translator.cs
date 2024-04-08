@@ -8,7 +8,7 @@ namespace AntlrDP.Translation;
 
 public class Translator
 {
-    private OalCode OalCode { get; set; }
+    private OalCode OalCode { get; }
     public List<TranslationClass> Classes { get; set; }
     public const string FirstMethodName = "FirstMethod";
     private bool _firstMethodCallUsed = false;
@@ -46,7 +46,7 @@ public class Translator
         switch (codeElement)
         {
             case MethodCall methodCall:
-                CurrentContext = ProcessMethodCallInGeneral(methodCall, CurrentContext);
+                CurrentContext = TranslateMethodCall(methodCall, CurrentContext);
                 break;
             case Statement statement:
                 ProcessStatement(statement);
@@ -65,7 +65,7 @@ public class Translator
 
         if (CurrentContext == null)
         {
-            TranslateStatementInGeneral(statement);
+            TranslateStatementWhenContextIsNull(statement);
             CurrentContext?.Instances.Clear();
         }
         else
@@ -113,7 +113,7 @@ public class Translator
         }
     }
 
-    static string GetName(object obj)
+    private static string GetName(object obj)
     {
         return obj switch
         {
@@ -158,7 +158,7 @@ public class Translator
         return context;
     }
 
-    private TranslationContext UpdateSenderMethods(TranslationContext context)
+    protected virtual TranslationContext UpdateSenderMethods(TranslationContext context)
     {
         foreach (var method in context.MethodNames)
         {
@@ -200,7 +200,9 @@ public class Translator
         {
             context.CurrentCode += CreateInstance(receiverClass, instanceName);
         }
-
+        
+        context.Instances.Add(receiverClass);
+        
         context.CurrentCode += CreateCall(instanceName, methodName);
 
         if (context.Sender == receiverClass && !_areSelfMessagesBlankMethods)
@@ -215,8 +217,7 @@ public class Translator
         {
             receiverClass.Methods.Add(receiverMethod);
         }
-
-        context.Instances.Add(receiverClass);
+        
         context.LastMethodsCalled.Add(methodName);
         return context;
     }
@@ -277,7 +278,7 @@ public class Translator
         {
             receiverClass.Methods.Add(receiverMethod);
         }
-
+        
         context.LastMethodsCalled.Add(methodName);
         return context;
     }
@@ -295,8 +296,8 @@ public class Translator
         };
         return context;
     }
-    
-    private TranslationContext ProcessMethodCallInGeneral(MethodCall methodCall, TranslationContext? context)
+
+    private TranslationContext TranslateMethodCall(MethodCall methodCall, TranslationContext? context)
     {
         var senderClass = GetSenderClass(methodCall);
         var receiverClass = GetReceiverClass(methodCall);
@@ -337,7 +338,7 @@ public class Translator
         return context;
     }
 
-    protected virtual TranslationContext UpdateTranslationContext(string instanceName, string methodName,
+    private TranslationContext UpdateTranslationContext(string instanceName, string methodName,
         TranslationClass receiverClass, TranslationContext context)
     {
         if (!context.Instances.Contains(receiverClass))
@@ -404,17 +405,17 @@ public class Translator
         return instanceName + "." + methodName + "();\n";
     }
 
-    private void TranslateStatementInGeneral(Statement statement)
+    private void TranslateStatementWhenContextIsNull(Statement statement)
     {
         foreach (var element in statement.StatementElements)
         {
             switch (element)
             {
                 case MethodCall methodCall:
-                    ProcessMethodCall(methodCall);
+                    CurrentContext = TranslateMethodCall(methodCall, CurrentContext);
                     break;
                 case Statement statementElement when CurrentContext == null:
-                    TranslateStatementInGeneral(statementElement);
+                    TranslateStatementWhenContextIsNull(statementElement);
                     CurrentContext?.Instances.Clear();
                     break;
                 case Statement statementElement:
@@ -431,7 +432,8 @@ public class Translator
             (MethodCall?)statement.StatementElements.FirstOrDefault(element => element is MethodCall);
         if (firstMethodInStatement == null)
         {
-            AppendToCurrentCode(statement);
+            CurrentContext.CurrentCode = CreateTxtOfStatement(statement) + CurrentContext?.CurrentCode +
+                                         GetEndOfStatement(statement);
             return;
         }
 
@@ -439,18 +441,6 @@ public class Translator
         CurrentContext.CurrentCode = CreateTxtOfStatement(statement) + method.Code +
                                      GetEndOfStatement(statement);
         CurrentContext.MethodNames = new List<string> { method.Name };
-    }
-
-    private void ProcessMethodCall(MethodCall methodCall)
-    {
-        if (CurrentContext == null)
-        {
-            CurrentContext = ProcessMethodCallInGeneral(methodCall, CurrentContext);
-        }
-        else
-        {
-            CurrentContext = ProcessMethodCallInGeneral(methodCall, CurrentContext);
-        }
     }
 
     private void UpdateCurrentContext(TranslationContext newContext)
@@ -465,12 +455,6 @@ public class Translator
 
         CurrentContext.CurrentCode += newContext.CurrentCode;
         CurrentContext.LastMethodsCalled = new List<string>(newContext.LastMethodsCalled);
-    }
-
-    private void AppendToCurrentCode(Statement statement)
-    {
-        CurrentContext.CurrentCode = CreateTxtOfStatement(statement) + CurrentContext?.CurrentCode +
-                                     GetEndOfStatement(statement);
     }
 
     private TranslationContext TranslateStatement(Statement statement, TranslationContext context, bool ff = false)
@@ -490,33 +474,7 @@ public class Translator
 
         if (CheckIfDiagramIsValid(statement, context)) return context;
 
-        foreach (var statementElement in statement.StatementElements)
-        {
-            if (statementElement is MethodCall methodCall)
-            {
-                if (GetSenderClass(methodCall) != context.Sender && GetReceiverClass(methodCall) != context.Sender &&
-                    ff)
-                {
-                    properContext.CurrentCode = context.CurrentCode;
-                    ff = false;
-                }
-
-                properContext = ProcessMethodCallInGeneral(methodCall, properContext);
-                if (ff)
-                {
-                    properContext.LastMethodsCalled = new List<string> { properContext.LastMethodsCalled.Last() };
-                    ff = false;
-                }
-            }
-
-            else if (statementElement is Statement statementEl)
-            {
-                var code = properContext.CurrentCode;
-                properContext = TranslateStatement(statementEl, properContext, firstStatementNeedToBeHandled);
-                firstStatementNeedToBeHandled = false;
-                properContext.CurrentCode = code + properContext.CurrentCode;
-            }
-        }
+        properContext = ProcessStatementElements(statement, context, ff, properContext, firstStatementNeedToBeHandled);
 
         properContext = UpdateSenderMethods(properContext);
         var firstMethodInStatement =
@@ -539,7 +497,41 @@ public class Translator
         return properContext;
     }
 
-    private void HandleEmptyStatement(Statement statement, TranslationContext context)
+    private TranslationContext ProcessStatementElements(Statement statement, TranslationContext context, bool ff,
+        TranslationContext properContext, bool firstStatementNeedToBeHandled)
+    {
+        foreach (var statementElement in statement.StatementElements)
+        {
+            if (statementElement is MethodCall methodCall)
+            {
+                if (GetSenderClass(methodCall) != context.Sender && GetReceiverClass(methodCall) != context.Sender &&
+                    ff)
+                {
+                    properContext.CurrentCode = context.CurrentCode;
+                    ff = false;
+                }
+
+                properContext = TranslateMethodCall(methodCall, properContext);
+                if (ff)
+                {
+                    properContext.LastMethodsCalled = new List<string> { properContext.LastMethodsCalled.Last() };
+                    ff = false;
+                }
+            }
+
+            else if (statementElement is Statement statementEl)
+            {
+                var code = properContext.CurrentCode;
+                properContext = TranslateStatement(statementEl, properContext, firstStatementNeedToBeHandled);
+                firstStatementNeedToBeHandled = false;
+                properContext.CurrentCode = code + properContext.CurrentCode;
+            }
+        }
+
+        return properContext;
+    }
+
+    private static void HandleEmptyStatement(Statement statement, TranslationContext context)
     {
         var method = context.LastReceiver.Methods.Last();
         if (method == null)
@@ -591,6 +583,7 @@ public class Translator
         {
             return match.Groups[1].Value;
         }
+
         return input;
     }
 
@@ -615,11 +608,38 @@ public class Translator
     public AnimArchAnimation CreateAnimArchAnimationObject()
     {
         var methodCodes = CreateAnimMethodsCodes();
-        return new AnimArchAnimation()
+        return new AnimArchAnimation
         {
             Code = GetWholeCode(),
-            MethodsCodes = methodCodes
+            MethodsCodes = methodCodes,
+            StartClass = GetFirstClass(),
+            StartMethod = GetFirstMethod()
         };
+    }
+
+    private string GetFirstClass()
+    {
+        if (Classes.Count == 0)
+        {
+            return "";
+        }
+
+        return Classes.First().Name;
+    }
+
+    private string GetFirstMethod()
+    {
+        if (Classes.Count == 0)
+        {
+            return "";
+        }
+
+        if (Classes.First().Methods.Count == 0)
+        {
+            return "";
+        }
+
+        return Classes.First().Methods.First().Name;
     }
 
     private List<AnimationMethodCode> CreateAnimMethodsCodes()
@@ -684,7 +704,7 @@ public class Translator
         return code.ToString();
     }
 
-    protected virtual void IndentAndAppendCodeLines(StringBuilder sb, string code)
+    private void IndentAndAppendCodeLines(StringBuilder sb, string code)
     {
         var lines = code.Split("\n");
         var indentation = 2;
