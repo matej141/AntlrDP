@@ -6,10 +6,10 @@ namespace AntlrDP.OalCodeElements;
 public class OalCode
 {
     public readonly List<OalCodeElement> CodeElements = new();
-    private readonly List<string> IdsInStatements = new();
+    private readonly List<string> _idsInStatements = new();
     public readonly List<Class> Classes = new();
     public readonly List<MethodCall> MethodCalls = new();
-    private SequenceDiagram SequenceDiagram { get; set; }
+    private SequenceDiagram SequenceDiagram { get; }
 
     public OalCode(SequenceDiagram sequenceDiagram)
     {
@@ -26,32 +26,42 @@ public class OalCode
             {
                 case Message message:
                 {
-                    if (SequenceDiagram.IdsInOwnedElements.Contains(message.XmiId) ||
-                        IdsInStatements.Contains(message.XmiId))
-                    {
-                        continue;
-                    }
-
-                    var methodCall = CreateMethodCall(message);
-
-                    CodeElements.Add(methodCall);
-                    MethodCalls.Add(methodCall);
-                    break;
+                    ProcessMessage(message);
+                    continue;
                 }
                 case CombinedFragment combinedFragment:
                 {
-                    if (SequenceDiagram.IdsInOwnedElements.Contains(combinedFragment.XmiId) ||
-                        IdsInStatements.Contains(combinedFragment.XmiId))
-                    {
-                        continue;
-                    }
-
-                    var fragments = CreateStatement(combinedFragment);
-                    CodeElements.AddRange(fragments);
-                    break;
+                    ProcessCombinedFragment(combinedFragment);
+                    continue;
                 }
             }
         }
+    }
+
+    private void ProcessMessage(Message message)
+    {
+        if (SequenceDiagram.IdsInOwnedElements.Contains(message.XmiId) ||
+            _idsInStatements.Contains(message.XmiId))
+        {
+            return;
+        }
+
+        var methodCall = CreateMethodCall(message);
+
+        CodeElements.Add(methodCall);
+        MethodCalls.Add(methodCall);
+    }
+    
+    private void ProcessCombinedFragment(CombinedFragment combinedFragment)
+    {
+        if (SequenceDiagram.IdsInOwnedElements.Contains(combinedFragment.XmiId) ||
+            _idsInStatements.Contains(combinedFragment.XmiId))
+        {
+            return;
+        }
+
+        var fragments = CreateStatement(combinedFragment);
+        CodeElements.AddRange(fragments);
     }
 
     private void ProcessLifelines()
@@ -111,7 +121,7 @@ public class OalCode
                 {
                     var methodCall = CreateMethodCall(ownedMessage);
                     statement.StatementElements.Add(methodCall);
-                    IdsInStatements.Add(methodCall.Id);
+                    _idsInStatements.Add(methodCall.Id);
                     MethodCalls.Add(methodCall);
                 }
                 else
@@ -122,7 +132,6 @@ public class OalCode
 
             if (ownedElement is not CombinedFragment ownedCombinedFragment)
             {
-                // statementList.Add(statement);
                 continue;
             }
 
@@ -130,7 +139,7 @@ public class OalCode
             statement.StatementElements.AddRange(anotherStatements);
 
             var ids = statement.StatementElements.Select(o => o.Id).ToList();
-            IdsInStatements.AddRange(ids);
+            _idsInStatements.AddRange(ids);
         }
     }
 
@@ -165,7 +174,6 @@ public class OalCode
                 {
                     return new ForStatement();
                 }
-
                 return new WhileStatement();
             case 2 when index == 0:
             case 3:

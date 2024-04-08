@@ -26,5 +26,4 @@ public class ElseStatement : StatementType
 
 public class ParStatement : StatementType
 {
-    
 }

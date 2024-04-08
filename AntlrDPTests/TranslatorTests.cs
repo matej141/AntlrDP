@@ -610,7 +610,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorMethodCount()
     {
-        var json = File.ReadAllText("files/Mediator_Z.json");
+        var json = File.ReadAllText("files/Mediator.json");
         var translator = Setup(json);
 
         var methodsA = translator.Classes[0].Methods;
@@ -624,7 +624,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorClassAMethod()
     {
-        var json = File.ReadAllText("files/Mediator_Z.json");
+        var json = File.ReadAllText("files/Mediator.json");
         var translator = Setup(json);
 
         var classAMethod = translator.Classes[0].Methods[0];
@@ -640,7 +640,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorClassBMethods()
     {
-        var json = File.ReadAllText("files/Mediator_Z.json");
+        var json = File.ReadAllText("files/Mediator.json");
         var translator = Setup(json);
 
         var classBFirstMethod = translator.Classes[1].Methods[0];
@@ -656,7 +656,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorClassCMethod()
     {
-        var json = File.ReadAllText("files/Mediator_Z.json");
+        var json = File.ReadAllText("files/Mediator.json");
         var translator = Setup(json);
 
         var classCMethod = translator.Classes[2].Methods[0];

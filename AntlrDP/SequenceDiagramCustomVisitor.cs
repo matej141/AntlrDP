@@ -5,7 +5,7 @@ namespace AntlrDP;
 
 public class SequenceDiagramCustomVisitor : SequenceDiagramBaseVisitor<object>
 {
-    public SequenceDiagram SequenceDiagram = new();
+    public readonly SequenceDiagram SequenceDiagram = new();
 
     public override object VisitObj(SequenceDiagramParser.ObjContext context)
     {
