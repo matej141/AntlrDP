@@ -6,9 +6,10 @@ namespace AntlrDP.OalCodeElements;
 public class OalCode
 {
     public readonly List<OalCodeElement> CodeElements = new();
-    public readonly List<string> IdsInStatements = new();
+    private readonly List<string> IdsInStatements = new();
     public readonly List<Class> Classes = new();
-    public SequenceDiagram SequenceDiagram { get; set; }
+    public readonly List<MethodCall> MethodCalls = new();
+    private SequenceDiagram SequenceDiagram { get; set; }
 
     public OalCode(SequenceDiagram sequenceDiagram)
     {
@@ -18,17 +19,11 @@ public class OalCode
 
     private void ProcessSequenceDiagramElements()
     {
+        ProcessLifelines();
         foreach (var element in SequenceDiagram.Elements)
         {
             switch (element)
             {
-                case Lifeline lifeline:
-                {
-                    var oalCodeClass = new Class { Id = lifeline.XmiId, Name = lifeline.Name };
-                    CodeElements.Add(oalCodeClass);
-                    Classes.Add(oalCodeClass);
-                    break;
-                }
                 case Message message:
                 {
                     if (SequenceDiagram.IdsInOwnedElements.Contains(message.XmiId) ||
@@ -40,6 +35,7 @@ public class OalCode
                     var methodCall = CreateMethodCall(message);
 
                     CodeElements.Add(methodCall);
+                    MethodCalls.Add(methodCall);
                     break;
                 }
                 case CombinedFragment combinedFragment:
@@ -58,6 +54,15 @@ public class OalCode
         }
     }
 
+    private void ProcessLifelines()
+    {
+        foreach (var lifeline in SequenceDiagram.Lifelines)
+        {
+            var oalCodeClass = new Class { Id = lifeline.XmiId, Name = lifeline.Name };
+            CodeElements.Add(oalCodeClass);
+            Classes.Add(oalCodeClass);
+        }
+    }
 
     private IEnumerable<Statement> CreateStatement(CombinedFragment combinedFragment)
     {
@@ -80,46 +85,53 @@ public class OalCode
             {
                 Id = interactionOperand.XmiId, Name = opaqueExpr.Body, StatementType = statementType,
                 StatementElements = new List<OalCodeElement>(),
+                IsFirst = combinedFragment.OperandIds.First( )== operandId,
                 IsLast = combinedFragment.OperandIds.Last() == operandId || statementType is WhileStatement
             };
 
-            foreach (var ownedElementId in interactionOperand.OwnedElements)
-            {
-                var ownedElement =
-                    SequenceDiagram.Elements.Find(sqdElement => sqdElement.XmiId == ownedElementId);
-                if (ownedElement is OccurenceSpecification occurenceSpecification)
-                {
-                    var ownedMessage = SequenceDiagram.Messages.Find(sqdMessage =>
-                        sqdMessage.SenderEventOccurenceId == occurenceSpecification.XmiId);
-                    if (ownedMessage != null)
-                    {
-                        var methodCall = CreateMethodCall(ownedMessage);
-                        statement.StatementElements.Add(methodCall);
-                        IdsInStatements.Add(methodCall.Id);
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
-
-                if (ownedElement is not CombinedFragment ownedCombinedFragment)
-                {
-                    // statementList.Add(statement);
-                    continue;
-                }
-
-                var anotherStatements = CreateStatement(ownedCombinedFragment);
-                statement.StatementElements.AddRange(anotherStatements);
-
-                var ids = statement.StatementElements.Select(o => o.Id).ToList();
-                IdsInStatements.AddRange(ids);
-            }
+            ProcessOwnedElements(interactionOperand, statement);
 
             statementList.Add(statement);
         }
 
         return statementList;
+    }
+
+    private void ProcessOwnedElements(InteractionOperand interactionOperand, Statement statement)
+    {
+        foreach (var ownedElementId in interactionOperand.OwnedElements)
+        {
+            var ownedElement =
+                SequenceDiagram.Elements.Find(sqdElement => sqdElement.XmiId == ownedElementId);
+            if (ownedElement is OccurenceSpecification occurenceSpecification)
+            {
+                var ownedMessage = SequenceDiagram.Messages.Find(sqdMessage =>
+                    sqdMessage.SenderEventOccurenceId == occurenceSpecification.XmiId);
+                if (ownedMessage != null)
+                {
+                    var methodCall = CreateMethodCall(ownedMessage);
+                    statement.StatementElements.Add(methodCall);
+                    IdsInStatements.Add(methodCall.Id);
+                    MethodCalls.Add(methodCall);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if (ownedElement is not CombinedFragment ownedCombinedFragment)
+            {
+                // statementList.Add(statement);
+                continue;
+            }
+
+            var anotherStatements = CreateStatement(ownedCombinedFragment);
+            statement.StatementElements.AddRange(anotherStatements);
+
+            var ids = statement.StatementElements.Select(o => o.Id).ToList();
+            IdsInStatements.AddRange(ids);
+        }
     }
 
     private MethodCall CreateMethodCall(Message message)
@@ -158,6 +170,8 @@ public class OalCode
             case 2 when index == 0:
             case 3:
                 return new IfStatement();
+            case 5:
+                return new ParStatement();
             case 2 when body == "else":
                 return new ElseStatement();
             default:

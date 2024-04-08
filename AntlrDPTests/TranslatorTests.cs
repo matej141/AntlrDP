@@ -6,13 +6,13 @@ namespace AntlrDPTests;
 [TestClass]
 public class TranslatorTests : BaseTest
 {
-    private new static Translator Setup(string input)
+    private new static Translator Setup(string input, bool areSelfMessagesBlankMethods = true)
     {
         var sequenceDiagramParser = SetupParser(input);
         var visitor = InitVisitor(sequenceDiagramParser);
         var sequenceDiagram = visitor.SequenceDiagram;
         var oalCode = new OalCode(sequenceDiagram);
-        var translator = new Translator(oalCode);
+        var translator = new Translator(oalCode, areSelfMessagesBlankMethods);
         return translator;
     }
 
@@ -430,7 +430,7 @@ public class TranslatorTests : BaseTest
         var json = File.ReadAllText("files/HelloSelfMessage.json");
         var translator = Setup(json);
 
-        var method = translator.Classes[0].Methods[1];
+        var method = translator.Classes[0].Methods[0];
 
         Assert.AreEqual(Translator.FirstMethodName, method.Name);
         Assert.AreEqual(
@@ -446,7 +446,7 @@ public class TranslatorTests : BaseTest
         var json = File.ReadAllText("files/HelloSelfMessage.json");
         var translator = Setup(json);
 
-        var method = translator.Classes[0].Methods[0];
+        var method = translator.Classes[0].Methods[1];
 
         Assert.AreEqual("hello1", method.Name);
         Assert.AreEqual(
@@ -460,7 +460,7 @@ public class TranslatorTests : BaseTest
         var json = File.ReadAllText("files/HelloMiddleSelfMessage.json");
         var translator = Setup(json);
 
-        var method = translator.Classes[0].Methods[1];
+        var method = translator.Classes[0].Methods[0];
 
         Assert.AreEqual(Translator.FirstMethodName, method.Name);
         Assert.AreEqual(
@@ -477,13 +477,45 @@ public class TranslatorTests : BaseTest
         var json = File.ReadAllText("files/HelloMiddleSelfMessage.json");
         var translator = Setup(json);
 
-        var selfMethod = translator.Classes[0].Methods[0];
+        var selfMethod = translator.Classes[0].Methods[1];
 
         Assert.AreEqual("hello2", selfMethod.Name);
         Assert.AreEqual(
             "",
             selfMethod.Code);
     }
+
+    [TestMethod]
+    public void TestSequenceHelloSelfMiddleMessageStartMethod_OtherModeOfSelfMessages()
+    {
+        var json = File.ReadAllText("files/HelloMiddleSelfMessage.json");
+        var translator = Setup(json, false);
+
+        var method = translator.Classes[0].Methods[0];
+
+        Assert.AreEqual(Translator.FirstMethodName, method.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello1();\n" +
+            "self.hello2();\n",
+            method.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceHelloSelfMiddleMessageSelfMethod_OtherModeOfSelfMessages()
+    {
+        var json = File.ReadAllText("files/HelloMiddleSelfMessage.json");
+        var translator = Setup(json, false);
+
+        var method = translator.Classes[0].Methods[1];
+
+        Assert.AreEqual("hello2", method.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello3();\n",
+            method.Code);
+    }
+
 
     [TestMethod]
     public void TestSequenceNestedLoopAndAltInLoopFirstMethod()
@@ -510,6 +542,25 @@ public class TranslatorTests : BaseTest
     }
 
     [TestMethod]
+    public void TestSequenceNestedLoopAndAltInLoopWithMessagesFirstMethod()
+    {
+        var json = File.ReadAllText("files/NestedLoopAndAltInLoopWithMessages.json");
+        var translator = Setup(json);
+
+        var method = translator.Classes[0].Methods[0];
+
+        Assert.AreEqual(1, translator.Classes[0].Methods.Count);
+        Assert.AreEqual(3, translator.Classes[1].Methods.Count);
+        Assert.AreEqual(Translator.FirstMethodName, method.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\n" +
+            "Class2_inst.helloClass2();\nwhile (condition1)\nwhile (condition2)\n" +
+            "if (condition3)\nClass2_inst.hello1();\nelif (condition4)\nClass2_inst.hello2();\n" +
+            "end if;\nend while;\nend while;\n",
+            method.Code);
+    }
+
+    [TestMethod]
     public void TestSequenceOneAltOppositeDirectionValidity()
     {
         var json = File.ReadAllText("files/OneAltOppositeDirectionMessage.json");
@@ -522,7 +573,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceChainOfResponsibilityFirstMethod()
     {
-        var json = File.ReadAllText("files/ChainOfResponsibility.json");
+        var json = File.ReadAllText("files/chainOfResp.json");
         var translator = Setup(json);
 
         var firstMethod = translator.Classes[0].Methods[0];
@@ -535,7 +586,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceChainOfResponsibilitySecondMethod()
     {
-        var json = File.ReadAllText("files/ChainOfResponsibility.json");
+        var json = File.ReadAllText("files/chainOfResp.json");
         var translator = Setup(json);
 
         var secondMethod = translator.Classes[1].Methods[0];
@@ -547,7 +598,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceChainOfResponsibilityThirdMethod()
     {
-        var json = File.ReadAllText("files/ChainOfResponsibility.json");
+        var json = File.ReadAllText("files/chainOfResp.json");
         var translator = Setup(json);
 
         var thirdMethod = translator.Classes[2].Methods[0];
@@ -559,7 +610,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorMethodCount()
     {
-        var json = File.ReadAllText("files/Mediator.json");
+        var json = File.ReadAllText("files/Mediator_Z.json");
         var translator = Setup(json);
 
         var methodsA = translator.Classes[0].Methods;
@@ -573,7 +624,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorClassAMethod()
     {
-        var json = File.ReadAllText("files/Mediator.json");
+        var json = File.ReadAllText("files/Mediator_Z.json");
         var translator = Setup(json);
 
         var classAMethod = translator.Classes[0].Methods[0];
@@ -589,7 +640,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorClassBMethods()
     {
-        var json = File.ReadAllText("files/Mediator.json");
+        var json = File.ReadAllText("files/Mediator_Z.json");
         var translator = Setup(json);
 
         var classBFirstMethod = translator.Classes[1].Methods[0];
@@ -605,7 +656,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceMediatorClassCMethod()
     {
-        var json = File.ReadAllText("files/Mediator.json");
+        var json = File.ReadAllText("files/Mediator_Z.json");
         var translator = Setup(json);
 
         var classCMethod = translator.Classes[2].Methods[0];
@@ -613,6 +664,435 @@ public class TranslatorTests : BaseTest
         Assert.AreEqual("methodC", classCMethod.Name);
         Assert.AreEqual("", classCMethod.Code);
     }
+
+    [TestMethod]
+    public void TestSequenceAbstractFactoryGameFirstMethod()
+    {
+        var json = File.ReadAllText("files/AbstractFactoryGame.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual("create object instance Game_inst of Game;\nGame_inst.CreateLevel();\n", firstMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAbstractFactoryGame_SecondAndThirdMethod_SelfMessagesAreBlankMethods()
+    {
+        var json = File.ReadAllText("files/AbstractFactoryGame.json");
+        var translator = Setup(json);
+
+        var secondMethod = translator.Classes[1].Methods[0];
+        var thirdMethod = translator.Classes[1].Methods[1];
+
+        Assert.AreEqual("CreateLevel", secondMethod.Name);
+        Assert.AreEqual(
+            "self.CreateHumanArmy();\ncreate object instance HumanFactory_inst of HumanFactory;\n" +
+            "HumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateRanger();\n" +
+            "HumanFactory_inst.CreateMage();\n",
+            secondMethod.Code);
+        Assert.AreEqual("CreateHumanArmy", thirdMethod.Name);
+        Assert.AreEqual(
+            "",
+            thirdMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAbstractFactoryGame_SecondAndThirdMethod_SelfMessagesAreNOTBlankMethods()
+    {
+        var json = File.ReadAllText("files/AbstractFactoryGame.json");
+        var translator = Setup(json, false);
+
+        var secondMethod = translator.Classes[1].Methods[0];
+        var thirdMethod = translator.Classes[1].Methods[1];
+
+        Assert.AreEqual("CreateLevel", secondMethod.Name);
+        Assert.AreEqual(
+            "self.CreateHumanArmy();\n",
+            secondMethod.Code);
+        Assert.AreEqual("CreateHumanArmy", thirdMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanFactory_inst of HumanFactory;\n" +
+            "HumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateRanger();\n" +
+            "HumanFactory_inst.CreateMage();\n",
+            thirdMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAbstractFactoryGameWithManyMethods_ManyMethods_SelfMessagesAreNOTBlankMethods()
+    {
+        var json = File.ReadAllText("files/AbstractFactoryGameManyMessages.json");
+        var translator = Setup(json, false);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[1].Methods[0];
+        var thirdMethod = translator.Classes[1].Methods[1];
+        var forthMethod = translator.Classes[1].Methods[2];
+
+        var fifthMethod = translator.Classes[2].Methods[0];
+        var sixthMethod = translator.Classes[2].Methods[1];
+        var seventhMethod = translator.Classes[2].Methods[2];
+
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual("create object instance Game_inst of Game;\n" +
+                        "Game_inst.CreateLevel();\n", firstMethod.Code);
+
+        Assert.AreEqual("CreateLevel", secondMethod.Name);
+        Assert.AreEqual(
+            "self.CreateHumanArmy();\n",
+            secondMethod.Code);
+        Assert.AreEqual("CreateHumanArmy", thirdMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanFactory_inst of HumanFactory;\nHumanFactory_inst.CreateWarrior();\n" +
+            "HumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateWarrior();\n" +
+            "HumanFactory_inst.CreateRanger();\nHumanFactory_inst.CreateRanger();\n" +
+            "HumanFactory_inst.CreateMage();\nself.CreateElvenArmy();\n",
+            thirdMethod.Code);
+
+        Assert.AreEqual("CreateElvenArmy", forthMethod.Name);
+        Assert.AreEqual(
+            "create object instance ElvenFactory_inst of ElvenFactory;\nElvenFactory_inst.CreateWarrior();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nself.CreateTrollArmy();\n",
+            forthMethod.Code);
+
+        Assert.AreEqual("CreateWarrior", fifthMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanWarrior_inst of HumanWarrior;\n" +
+            "HumanWarrior_inst.HumanWarrior();\n",
+            fifthMethod.Code);
+
+        Assert.AreEqual("CreateRanger", sixthMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanRanger_inst of HumanRanger;\n" +
+            "HumanRanger_inst.HumanRanger();\n",
+            sixthMethod.Code);
+
+        Assert.AreEqual("CreateMage", seventhMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanMage_inst of HumanMage;\n" +
+            "HumanMage_inst.HumanMage();\n",
+            seventhMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAbstractFactoryGameParallel_ManyMethods_SelfMessagesAreBlankMethods()
+    {
+        var json = File.ReadAllText("files/AbstractFactoryGameParallel.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[1].Methods[0];
+        var thirdMethod = translator.Classes[1].Methods[1];
+        var forthMethod = translator.Classes[1].Methods[2];
+        var fifthMethod = translator.Classes[1].Methods[3];
+
+        var sixthMethod = translator.Classes[2].Methods[0];
+        var seventhMethod = translator.Classes[2].Methods[1];
+        var eighthMethod = translator.Classes[2].Methods[2];
+
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual("create object instance Game_inst of Game;\n" +
+                        "Game_inst.CreateLevel();\n", firstMethod.Code);
+
+        Assert.AreEqual("CreateLevel", secondMethod.Name);
+        Assert.AreEqual(
+            "par\nthread\nself.CreateHumanArmy();\ncreate object instance HumanFactory_inst of HumanFactory;\nHumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateRanger();\nHumanFactory_inst.CreateRanger();\nHumanFactory_inst.CreateMage();\nend thread;\nthread\nself.CreateElvenArmy();\ncreate object instance ElvenFactory_inst of ElvenFactory;\nElvenFactory_inst.CreateWarrior();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateMage();\nend thread;\nthread\nself.CreateTrollArmy();\ncreate object instance TrollFactory_inst of TrollFactory;\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateMage();\nend thread;\nend par;\n",
+            secondMethod.Code);
+        Assert.AreEqual("CreateHumanArmy", thirdMethod.Name);
+        Assert.AreEqual(
+            "",
+            thirdMethod.Code);
+
+        Assert.AreEqual("CreateElvenArmy", forthMethod.Name);
+        Assert.AreEqual(
+            "",
+            forthMethod.Code);
+
+        Assert.AreEqual("CreateTrollArmy", fifthMethod.Name);
+        Assert.AreEqual(
+            "",
+            fifthMethod.Code);
+
+        Assert.AreEqual("CreateWarrior", sixthMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanWarrior_inst of HumanWarrior;\n" +
+            "HumanWarrior_inst.HumanWarrior();\n",
+            sixthMethod.Code);
+
+        Assert.AreEqual("CreateRanger", seventhMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanRanger_inst of HumanRanger;\n" +
+            "HumanRanger_inst.HumanRanger();\n",
+            seventhMethod.Code);
+
+        Assert.AreEqual("CreateMage", eighthMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanMage_inst of HumanMage;\n" +
+            "HumanMage_inst.HumanMage();\n",
+            eighthMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAbstractFactoryGameParallel_Methods_SelfMessagesAreNotBlankMethods()
+    {
+        var json = File.ReadAllText("files/AbstractFactoryGameParallel.json");
+        var translator = Setup(json, false);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[1].Methods[0];
+        var thirdMethod = translator.Classes[1].Methods[1];
+        var forthMethod = translator.Classes[1].Methods[2];
+        var fifthMethod = translator.Classes[1].Methods[3];
+
+        var sixthMethod = translator.Classes[2].Methods[0];
+        var seventhMethod = translator.Classes[2].Methods[1];
+        var eighthMethod = translator.Classes[2].Methods[2];
+
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual("create object instance Game_inst of Game;\n" +
+                        "Game_inst.CreateLevel();\n", firstMethod.Code);
+
+        Assert.AreEqual("CreateLevel", secondMethod.Name);
+        Assert.AreEqual(
+            "par\nthread\nself.CreateHumanArmy();\nend thread;\nthread\nself.CreateElvenArmy();\nend thread;\nthread\nself.CreateTrollArmy();\nend thread;\nend par;\n",
+            secondMethod.Code);
+        Assert.AreEqual("CreateHumanArmy", thirdMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanFactory_inst of HumanFactory;\nHumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateWarrior();\nHumanFactory_inst.CreateRanger();\nHumanFactory_inst.CreateRanger();\nHumanFactory_inst.CreateMage();\n",
+            thirdMethod.Code);
+
+        Assert.AreEqual("CreateElvenArmy", forthMethod.Name);
+        Assert.AreEqual(
+            "create object instance ElvenFactory_inst of ElvenFactory;\nElvenFactory_inst.CreateWarrior();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateRanger();\nElvenFactory_inst.CreateMage();\n",
+            forthMethod.Code);
+
+        Assert.AreEqual("CreateTrollArmy", fifthMethod.Name);
+        Assert.AreEqual(
+            "create object instance TrollFactory_inst of TrollFactory;\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateWarrior();\nTrollFactory_inst.CreateMage();\n",
+            fifthMethod.Code);
+
+        Assert.AreEqual("CreateWarrior", sixthMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanWarrior_inst of HumanWarrior;\n" +
+            "HumanWarrior_inst.HumanWarrior();\n",
+            sixthMethod.Code);
+
+        Assert.AreEqual("CreateRanger", seventhMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanRanger_inst of HumanRanger;\n" +
+            "HumanRanger_inst.HumanRanger();\n",
+            seventhMethod.Code);
+
+        Assert.AreEqual("CreateMage", eighthMethod.Name);
+        Assert.AreEqual(
+            "create object instance HumanMage_inst of HumanMage;\n" +
+            "HumanMage_inst.HumanMage();\n",
+            eighthMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceDifferentDirectionsWithoutAlt_AllMethods()
+    {
+        var json = File.ReadAllText("files/DifferentDirectionsWithoutAlt.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethodOfFirstClass = translator.Classes[0].Methods[1];
+
+        var thirdMethod = translator.Classes[1].Methods[0];
+        var forthMethod = translator.Classes[1].Methods[1];
+        var fifthMethod = translator.Classes[1].Methods[2];
+
+        Assert.AreEqual(2, translator.Classes[0].Methods.Count);
+        Assert.AreEqual(3, translator.Classes[1].Methods.Count);
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\nClass2_inst.hello1();\n",
+            firstMethod.Code);
+
+        Assert.AreEqual("hello2", secondMethodOfFirstClass.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello3();\n" +
+            "Class2_inst.hello4();\n",
+            secondMethodOfFirstClass.Code);
+
+        Assert.AreEqual("hello1", thirdMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class1_inst of Class1;\nClass1_inst.hello2();\n",
+            thirdMethod.Code);
+
+        Assert.AreEqual("hello3", forthMethod.Name);
+        Assert.AreEqual(
+            "",
+            forthMethod.Code);
+
+        Assert.AreEqual("hello4", fifthMethod.Name);
+        Assert.AreEqual(
+            "",
+            fifthMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAltWithDifferentDirections_AllMethods()
+    {
+        var json = File.ReadAllText("files/AltWithDifferentDirections.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[0].Methods[1];
+
+        var thirdMethod = translator.Classes[1].Methods[0];
+        var forthMethod = translator.Classes[1].Methods[1];
+        var fifthMethod = translator.Classes[1].Methods[2];
+
+        Assert.AreEqual(2, translator.Classes[0].Methods.Count);
+        Assert.AreEqual(3, translator.Classes[1].Methods.Count);
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual(
+            "if (condition1)\ncreate object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello1();\n" +
+            "elif (condition2)\ncreate object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello4();\nend if;\n",
+            firstMethod.Code);
+
+        Assert.AreEqual("hello2", secondMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello3();\n",
+            secondMethod.Code);
+
+        Assert.AreEqual("hello1", thirdMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class1_inst of Class1;\nClass1_inst.hello2();\n",
+            thirdMethod.Code);
+
+        Assert.AreEqual("hello3", forthMethod.Name);
+        Assert.AreEqual(
+            "",
+            forthMethod.Code);
+
+        Assert.AreEqual("hello4", fifthMethod.Name);
+        Assert.AreEqual(
+            "",
+            fifthMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAltWithDifferentDirectionsWithMessagesBeforeAfterAlt_AllMethods()
+    {
+        var json = File.ReadAllText("files/AltWithDifferentDirectionsWithMessagesBeforeAfterAlt.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[0].Methods[1];
+
+        var thirdMethod = translator.Classes[1].Methods[0];
+        var forthMethod = translator.Classes[1].Methods[1];
+        var fifthMethod = translator.Classes[1].Methods[2];
+        var sixthMethod = translator.Classes[1].Methods[3];
+        var seventhMethod = translator.Classes[1].Methods[4];
+
+        Assert.AreEqual(2, translator.Classes[0].Methods.Count);
+        Assert.AreEqual(5, translator.Classes[1].Methods.Count);
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\nClass2_inst.helloBeforeAlt();\n" +
+            "if (condition1)\nClass2_inst.hello1();\nelif (condition2)\nClass2_inst.hello4();\nend if;\n" +
+            "Class2_inst.helloAfterAlt();\n",
+            firstMethod.Code);
+
+        Assert.AreEqual("hello2", secondMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\n" +
+            "Class2_inst.hello3();\n",
+            secondMethod.Code);
+
+        Assert.AreEqual("helloBeforeAlt", thirdMethod.Name);
+        Assert.AreEqual(
+            "",
+            thirdMethod.Code);
+
+        Assert.AreEqual("hello1", forthMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class1_inst of Class1;\nClass1_inst.hello2();\n",
+            forthMethod.Code);
+
+        Assert.AreEqual("hello3", fifthMethod.Name);
+        Assert.AreEqual(
+            "",
+            fifthMethod.Code);
+
+        Assert.AreEqual("hello4", sixthMethod.Name);
+        Assert.AreEqual(
+            "",
+            sixthMethod.Code);
+
+        Assert.AreEqual("helloAfterAlt", seventhMethod.Name);
+        Assert.AreEqual(
+            "",
+            seventhMethod.Code);
+    }
+
+    [TestMethod]
+    public void TestSequenceAltFirstMethodFromDifferentClass_AllMethods()
+    {
+        var json = File.ReadAllText("files/AltFirstMethodFromDifferentClass.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[1].Methods[0];
+
+        var thirdMethod = translator.Classes[2].Methods[0];
+        var forthMethod = translator.Classes[2].Methods[1];
+
+        Assert.AreEqual(1, translator.Classes[0].Methods.Count);
+        Assert.AreEqual(1, translator.Classes[1].Methods.Count);
+        Assert.AreEqual(2, translator.Classes[2].Methods.Count);
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\nClass2_inst.hello1();\n",
+            firstMethod.Code);
+
+        Assert.AreEqual("hello1", secondMethod.Name);
+        Assert.AreEqual(
+            "if (condition1)\ncreate object instance Class3_inst of Class3;\n" +
+            "Class3_inst.hello2();\nelif (condition2)\n" +
+            "Class3_inst.hello3();\nend if;\n",
+            secondMethod.Code);
+
+        Assert.AreEqual("hello2", thirdMethod.Name);
+        Assert.AreEqual(
+            "",
+            thirdMethod.Code);
+
+        Assert.AreEqual("hello3", forthMethod.Name);
+        Assert.AreEqual(
+            "",
+            forthMethod.Code);
+    }
+
+
+    [TestMethod]
+    public void TestSequenceEmptyOpt_AllMethods()
+    {
+        var json = File.ReadAllText("files/EmptyOpt.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[1].Methods[0];
+
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual(
+            "create object instance Class2_inst of Class2;\nClass2_inst.hello1();\n",
+            firstMethod.Code);
+
+        Assert.AreEqual("hello1", secondMethod.Name);
+        Assert.AreEqual(
+            "if (condition1)\nend if;\n",
+            secondMethod.Code);
+    }
+
 
     // advanced
     // [TestMethod]

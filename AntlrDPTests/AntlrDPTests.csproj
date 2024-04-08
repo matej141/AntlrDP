@@ -25,8 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="bin\Debug\net7.0\files\AbstractFactoryGame.json" />
+    <Content Include="bin\Debug\net7.0\files\AbstractFactoryGameManyMessages.json" />
+    <Content Include="bin\Debug\net7.0\files\AbstractFactoryGameParallel.json" />
+    <Content Include="bin\Debug\net7.0\files\AltFirstMethodFromDifferentClass.json" />
+    <Content Include="bin\Debug\net7.0\files\AltWithDifferentDirections.json" />
+    <Content Include="bin\Debug\net7.0\files\AltWithDifferentDirectionsWithMessagesBeforeAfterAlt.json" />
     <Content Include="bin\Debug\net7.0\files\ChainOfResponsibility.json" />
     <Content Include="bin\Debug\net7.0\files\Crazy.json" />
+    <Content Include="bin\Debug\net7.0\files\DifferentDirectionsWithoutAlt.json" />
+    <Content Include="bin\Debug\net7.0\files\EmptyOpt.json" />
     <Content Include="bin\Debug\net7.0\files\FowlerUMLDistilled.json" />
     <Content Include="bin\Debug\net7.0\files\FowlerUMLDistilledImproved.json" />
     <Content Include="bin\Debug\net7.0\files\Hello3ClassesWaterfall.json" />
@@ -41,6 +49,7 @@
     <Content Include="bin\Debug\net7.0\files\NestedAltInLoop.json" />
     <Content Include="bin\Debug\net7.0\files\NestedAltInLoopWithMessages.json" />
     <Content Include="bin\Debug\net7.0\files\NestedLoopAndAltInLoop.json" />
+    <Content Include="bin\Debug\net7.0\files\NestedLoopAndAltInLoopWithMessages.json" />
     <Content Include="bin\Debug\net7.0\files\OneAltBeforeAfterMessages.json" />
     <Content Include="bin\Debug\net7.0\files\OneAltDifferentDirectionsAfterAlt.json" />
     <Content Include="bin\Debug\net7.0\files\OneAltMoreMessagesInCondition.json" />
@@ -51,6 +60,7 @@
     <Content Include="bin\Debug\net7.0\files\OneAltWithElse.json" />
     <Content Include="bin\Debug\net7.0\files\OneHelloOneReturn.json" />
     <Content Include="bin\Debug\net7.0\files\OneLoopBeforeAfterMessages.json" />
+    <Content Include="bin\Debug\net7.0\files\OnePar.json" />
     <Content Include="bin\Debug\net7.0\files\SequenceSingleClass.json" />
     <Content Include="bin\Debug\net7.0\files\SimpleALT.json" />
     <Content Include="bin\Debug\net7.0\files\SimpleLoop.json" />

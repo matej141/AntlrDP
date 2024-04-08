@@ -254,4 +254,28 @@ public class OalCodeTests : BaseTest
         Assert.AreEqual(1, obtainedElifStatement.StatementElements.Count);
         Assert.AreEqual(true, obtainedElifStatement.IsLast);
     }
+    
+    [TestMethod]
+    public void TestOalCodeOneParFirstAndLastStatement()
+    {
+        var json = File.ReadAllText("files/OnePar.json");
+        var oalCode = Setup(json);
+
+        var obtainedFirstParStatement = (Statement)oalCode.CodeElements[2];
+        var obtainedLastParStatement = (Statement)oalCode.CodeElements[4];
+        var parStatementObj = new ParStatement();
+
+        Assert.IsInstanceOfType(parStatementObj, obtainedFirstParStatement.StatementType.GetType());
+        Assert.IsInstanceOfType(parStatementObj, obtainedLastParStatement.StatementType.GetType());
+        Assert.AreEqual("", obtainedFirstParStatement.Name);
+        Assert.AreEqual("", obtainedLastParStatement.Name);
+        
+        Assert.AreEqual(1, obtainedFirstParStatement.StatementElements.Count);
+        Assert.AreEqual(1, obtainedLastParStatement.StatementElements.Count);
+        
+        Assert.AreEqual(true, obtainedFirstParStatement.IsFirst);
+        Assert.AreEqual(false, obtainedFirstParStatement.IsLast);
+        Assert.AreEqual(false, obtainedLastParStatement.IsFirst);
+        Assert.AreEqual(true, obtainedLastParStatement.IsLast);
+    }
 }

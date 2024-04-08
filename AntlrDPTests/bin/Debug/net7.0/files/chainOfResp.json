@@ -1,0 +1,173 @@
+[
+  {
+    "lifeline": [
+      { "XmiIdRef": "Lifeline__2" },
+      { "XmiIdRef": "Lifeline__3" },
+      { "XmiIdRef": "Lifeline__4" }
+    ],
+    "message": [
+      { "XmiIdRef": "Message__8" },
+      { "XmiIdRef": "Message__11" },
+      { "XmiIdRef": "Message__14" }
+    ],
+    "covered": [
+      { "XmiIdRef": "Lifeline__2" },
+      { "XmiIdRef": "Lifeline__3" },
+      { "XmiIdRef": "Lifeline__4" }
+    ],
+    "XmiId": "Interaction__1",
+    "fragment": [
+      { "XmiIdRef": "OccurrenceSpecification__7" },
+      { "XmiIdRef": "OccurrenceSpecification__6" },
+      { "XmiIdRef": "OccurrenceSpecification__10" },
+      { "XmiIdRef": "OccurrenceSpecification__9" },
+      { "XmiIdRef": "OccurrenceSpecification__13" },
+      { "XmiIdRef": "OccurrenceSpecification__12" }
+    ],
+    "ownedElement": [
+      { "XmiIdRef": "Lifeline__2" },
+      { "XmiIdRef": "Lifeline__3" },
+      { "XmiIdRef": "OccurrenceSpecification__7" },
+      { "XmiIdRef": "OccurrenceSpecification__6" },
+      { "XmiIdRef": "Message__8" },
+      { "XmiIdRef": "Lifeline__4" },
+      { "XmiIdRef": "OccurrenceSpecification__10" },
+      { "XmiIdRef": "OccurrenceSpecification__9" },
+      { "XmiIdRef": "Message__11" },
+      { "XmiIdRef": "OccurrenceSpecification__13" },
+      { "XmiIdRef": "OccurrenceSpecification__12" },
+      { "XmiIdRef": "Message__14" }
+    ],
+    "name": "",
+    "XmiType": "uml:Interaction"
+  },
+  {
+    "covered": [{ "XmiIdRef": "Lifeline__2" }],
+    "enclosingInteraction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "OccurrenceSpecification__6",
+    "fragment": [],
+    "ownedElement": [],
+    "name": "",
+    "XmiType": "uml:OccurrenceSpecification"
+  },
+  {
+    "covered": [{ "XmiIdRef": "Lifeline__3" }],
+    "enclosingInteraction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "OccurrenceSpecification__7",
+    "fragment": [],
+    "ownedElement": [],
+    "name": "",
+    "XmiType": "uml:OccurrenceSpecification"
+  },
+  {
+    "name": "methodB",
+    "receiveEvent": { "XmiIdRef": "OccurrenceSpecification__7" },
+    "sendEvent": { "XmiIdRef": "OccurrenceSpecification__6" },
+    "interaction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "Message__8",
+    "fragment": [],
+    "ownedElement": [],
+    "XmiType": "uml:Message",
+    "messageKind_": 0,
+    "messageSort": 0
+  },
+  {
+    "covered": [{ "XmiIdRef": "Lifeline__3" }],
+    "enclosingInteraction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "OccurrenceSpecification__9",
+    "fragment": [],
+    "ownedElement": [],
+    "name": "",
+    "XmiType": "uml:OccurrenceSpecification"
+  },
+  {
+    "covered": [{ "XmiIdRef": "Lifeline__4" }],
+    "enclosingInteraction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "OccurrenceSpecification__10",
+    "fragment": [],
+    "ownedElement": [],
+    "name": "",
+    "XmiType": "uml:OccurrenceSpecification"
+  },
+  {
+    "name": "methodC",
+    "receiveEvent": { "XmiIdRef": "OccurrenceSpecification__10" },
+    "sendEvent": { "XmiIdRef": "OccurrenceSpecification__9" },
+    "interaction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "Message__11",
+    "fragment": [],
+    "ownedElement": [],
+    "XmiType": "uml:Message",
+    "messageKind_": 0,
+    "messageSort": 0
+  },
+  {
+    "covered": [{ "XmiIdRef": "Lifeline__4" }],
+    "enclosingInteraction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "OccurrenceSpecification__12",
+    "fragment": [],
+    "ownedElement": [],
+    "name": "",
+    "XmiType": "uml:OccurrenceSpecification"
+  },
+  {
+    "covered": [{ "XmiIdRef": "Lifeline__2" }],
+    "enclosingInteraction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "OccurrenceSpecification__13",
+    "fragment": [],
+    "ownedElement": [],
+    "name": "",
+    "XmiType": "uml:OccurrenceSpecification"
+  },
+  {
+    "name": "methodA",
+    "receiveEvent": { "XmiIdRef": "OccurrenceSpecification__13" },
+    "sendEvent": { "XmiIdRef": "OccurrenceSpecification__12" },
+    "interaction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "Message__14",
+    "fragment": [],
+    "ownedElement": [],
+    "XmiType": "uml:Message",
+    "messageKind_": 0,
+    "messageSort": 0
+  },
+  {
+    "name": "ClassA",
+    "coveredBy": [{ "XmiIdRef": "Interaction__1" }],
+    "interaction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "Lifeline__2",
+    "fragment": [],
+    "ownedElement": [],
+    "XmiType": "uml:Lifeline"
+  },
+  {
+    "name": "ClassB",
+    "coveredBy": [{ "XmiIdRef": "Interaction__1" }],
+    "interaction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "Lifeline__3",
+    "fragment": [],
+    "ownedElement": [],
+    "XmiType": "uml:Lifeline"
+  },
+  {
+    "name": "ClassC",
+    "coveredBy": [{ "XmiIdRef": "Interaction__1" }],
+    "interaction": { "XmiIdRef": "Interaction__1" },
+    "owner": { "XmiIdRef": "Interaction__1" },
+    "XmiId": "Lifeline__4",
+    "fragment": [],
+    "ownedElement": [],
+    "XmiType": "uml:Lifeline"
+  }
+]

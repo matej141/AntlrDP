@@ -8,6 +8,7 @@ public class TranslationContext
     public string CurrentCode { get; set; }
     public List<TranslationClass> Instances = new();
     public List<string> LastMethodsCalled = new();
+    public TranslationClass LastReceiver = new();
 
     public TranslationContext()
     {

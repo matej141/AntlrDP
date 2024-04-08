@@ -6,5 +6,6 @@ public class Statement : OalCodeElement
 {
     public List<OalCodeElement> StatementElements = new();
     public required StatementType StatementType { get; init; }
+    public bool IsFirst = new();
     public bool IsLast = new();
 }
