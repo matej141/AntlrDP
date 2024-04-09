@@ -47,7 +47,7 @@ public sealed class Translator
         switch (codeElement)
         {
             case MethodCall methodCall:
-                if (!CheckMagic(OalCode.CodeElements, methodCall))
+                if (!PreviousMethodCallInElementsWasFromTheSameClass(OalCode.CodeElements, methodCall))
                 {
                     FinishDiagramAsInvalid();
                     return;
@@ -159,6 +159,17 @@ public sealed class Translator
             Receiver = receiverClass,
             CurrentCode = ""
         };
+        _firstMethodCallUsed = true;
+        return FinishContext(methodCall, context);
+    }
+
+    private TranslationContext FinishContext(MethodCall methodCall, TranslationContext context)
+    {
+        var (senderClass, receiverClass, instanceName, methodName) = GetBasicElementsOfMethodCall(methodCall);
+        if (senderClass == null || receiverClass == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
 
         if (senderClass != receiverClass)
         {
@@ -175,11 +186,13 @@ public sealed class Translator
 
         var receiverMethod = new TranslationMethod
             { Name = methodName, Code = "", IsSelfMethod = senderClass == receiverClass };
-        receiverClass.Methods.Add(receiverMethod);
+        if (!receiverClass.Methods.Contains(receiverMethod))
+        {
+            receiverClass.Methods.Add(receiverMethod);
+        }
+
         context.Instances.Add(receiverClass);
         context.LastMethodCalled = methodName;
-
-        _firstMethodCallUsed = true;
         return context;
     }
 
@@ -199,7 +212,7 @@ public sealed class Translator
         {
             return FinishDiagramAsInvalid();
         }
-        
+
         var senderMethod =
             context.Sender.Methods.Find(translationMethod => translationMethod.Name == context.MethodName);
         if (senderMethod != null)
@@ -239,30 +252,8 @@ public sealed class Translator
             Receiver = receiverClass,
             CurrentCode = ""
         };
-        if (senderClass != receiverClass)
-        {
-            context.CurrentCode += CreateInstance(receiverClass, instanceName);
-        }
 
-        context.Instances.Add(receiverClass);
-
-        context.CurrentCode += CreateCall(instanceName, methodName);
-
-        if (context.Sender == receiverClass && !_areSelfMessagesBlankMethods)
-        {
-            context = InitSelfMethod(methodName, receiverClass, context);
-            return context;
-        }
-
-        var receiverMethod = new TranslationMethod
-            { Name = methodName, Code = "", IsSelfMethod = senderClass == receiverClass };
-        if (!receiverClass.Methods.Contains(receiverMethod))
-        {
-            receiverClass.Methods.Add(receiverMethod);
-        }
-
-        context.LastMethodCalled = methodName;
-        return context;
+        return FinishContext(methodCall, context);
     }
 
     private TranslationMethod? FindLastMethodOfSenderClass(TranslationClass senderClass)
@@ -590,7 +581,7 @@ public sealed class Translator
 
         properContext.CurrentCode = CreateTxtOfStatement(statement) + method.Code +
                                     GetEndOfStatement(statement);
-        properContext.MethodName =  method.Name;
+        properContext.MethodName = method.Name;
         var translationSenderClass = Classes.Find(@class => firstMethodInStatement.SenderClass.Id == @class.Id);
         var translationReceiverClass = Classes.Find(@class => firstMethodInStatement.ReceiverClass.Id == @class.Id);
         if (translationSenderClass == null || translationReceiverClass == null)
@@ -604,7 +595,7 @@ public sealed class Translator
         return properContext;
     }
 
-    private bool CheckMagic(List<OalCodeElement> elements, MethodCall methodCall)
+    private bool PreviousMethodCallInElementsWasFromTheSameClass(List<OalCodeElement> elements, MethodCall methodCall)
     {
         var indexOfMethodCallInElements = elements.FindIndex(element => element == methodCall);
         if (indexOfMethodCallInElements == 0)
@@ -679,7 +670,7 @@ public sealed class Translator
             {
                 case MethodCall methodCall:
                 {
-                    if (!CheckMagic(statement.StatementElements, methodCall))
+                    if (!PreviousMethodCallInElementsWasFromTheSameClass(statement.StatementElements, methodCall))
                     {
                         return FinishDiagramAsInvalid();
                     }
@@ -927,7 +918,6 @@ public sealed class Translator
             {
                 indentation--;
                 AppendLineWithIndent(sb, line, indentation);
-                //indentation--;
                 continue;
             }
 
@@ -935,7 +925,6 @@ public sealed class Translator
                 line.Contains(
                     "thread"))
             {
-                //indentation++;
                 AppendLineWithIndent(sb, line, indentation);
                 indentation++;
                 continue;
