@@ -68,7 +68,7 @@ public class OalCode
     {
         foreach (var lifeline in SequenceDiagram.Lifelines)
         {
-            var oalCodeClass = new Class { Id = lifeline.XmiId, Name = lifeline.Name };
+            var oalCodeClass = new Class { Id = lifeline.XmiId, Body = lifeline.Name };
             CodeElements.Add(oalCodeClass);
             Classes.Add(oalCodeClass);
         }
@@ -93,7 +93,7 @@ public class OalCode
 
             var statement = new Statement
             {
-                Id = interactionOperand.XmiId, Name = opaqueExpr.Body, StatementType = statementType,
+                Id = interactionOperand.XmiId, Body = opaqueExpr.Body, StatementType = statementType,
                 StatementElements = new List<OalCodeElement>(),
                 IsFirst = combinedFragment.OperandIds.First( )== operandId,
                 IsLast = combinedFragment.OperandIds.Last() == operandId || statementType is WhileStatement
@@ -145,7 +145,7 @@ public class OalCode
 
     private MethodCall CreateMethodCall(Message message)
     {
-        var method = new MethodCall { Id = message.XmiId, Name = message.Name };
+        var method = new MethodCall { Id = message.XmiId, Body = message.Name };
         var receiverClassId = SequenceDiagram.OccurenceSpecifications.Find(spec =>
             spec.XmiId == message.ReceiverEventOccurenceId)?.ReferenceIdOfCoveredObject;
         var receiverClass = Classes.Find(oalCodeClass => oalCodeClass.Id == receiverClassId);
@@ -175,11 +175,11 @@ public class OalCode
                     return new ForStatement();
                 }
                 return new WhileStatement();
+            case 5:
+                return new ParStatement();
             case 2 when index == 0:
             case 3:
                 return new IfStatement();
-            case 5:
-                return new ParStatement();
             case 2 when body == "else":
                 return new ElseStatement();
             default:

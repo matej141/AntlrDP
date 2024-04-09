@@ -6,7 +6,7 @@ namespace AntlrDPTests;
 [TestClass]
 public class TranslatorTests : BaseTest
 {
-    private new static Translator Setup(string input, bool areSelfMessagesBlankMethods = true)
+    private static Translator Setup(string input, bool areSelfMessagesBlankMethods = true)
     {
         var sequenceDiagramParser = SetupParser(input);
         var visitor = InitVisitor(sequenceDiagramParser);
@@ -309,56 +309,6 @@ public class TranslatorTests : BaseTest
     }
 
     [TestMethod]
-    public void TestSequenceOneAltTwoRespondMessagesAfterAltFirstMethod()
-    {
-        var json = File.ReadAllText("files/OneAltTwoRespondMessagesAfterAlt.json");
-        var translator = Setup(json);
-        var firstMethod = translator.Classes[0].Methods[0];
-
-        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
-        Assert.AreEqual(
-            "if (condition1)\n" +
-            "create object instance Class2_inst of Class2;\n" +
-            "Class2_inst.hello1();\n" +
-            "elif (condition2)\n" +
-            "create object instance Class2_inst of Class2;\n" +
-            "Class2_inst.hello2();\n" +
-            "end if;\n",
-            firstMethod.Code);
-    }
-
-    [TestMethod]
-    public void TestSequenceOneAltTwoRespondMessagesAfterAltSecondClassFirstMethod()
-    {
-        var json = File.ReadAllText("files/OneAltTwoRespondMessagesAfterAlt.json");
-        var translator = Setup(json);
-        var secondClassFirstMethod = translator.Classes[1].Methods[0];
-
-        Assert.AreEqual("hello1", secondClassFirstMethod.Name);
-        Assert.AreEqual(
-            "create object instance Class1_inst of Class1;\n" +
-            "Class1_inst.hello3();\n" +
-            "Class1_inst.hello4();\n",
-            secondClassFirstMethod.Code);
-    }
-
-    [TestMethod]
-    public void TestSequenceOneAltTwoRespondMessagesAfterAltSecondClassThirdMethod()
-    {
-        var json = File.ReadAllText("files/OneAltTwoRespondMessagesAfterAlt.json");
-        var translator = Setup(json);
-
-        var secondClassSecondMethod = translator.Classes[1].Methods[1];
-
-        Assert.AreEqual("hello2", secondClassSecondMethod.Name);
-        Assert.AreEqual(
-            "create object instance Class1_inst of Class1;\n" +
-            "Class1_inst.hello3();\n" +
-            "Class1_inst.hello4();\n",
-            secondClassSecondMethod.Code);
-    }
-
-    [TestMethod]
     public void TestSequenceNestedAltInLoopMethod()
     {
         var json = File.ReadAllText("files/NestedAltInLoop.json");
@@ -561,11 +511,28 @@ public class TranslatorTests : BaseTest
     }
 
     [TestMethod]
-    public void TestSequenceOneAltOppositeDirectionValidity()
+    public void Test_SqD_OneAltOppositeDirection_Validity()
     {
         var json = File.ReadAllText("files/OneAltOppositeDirectionMessage.json");
         var translator = Setup(json);
 
+        Assert.AreEqual(false, translator.IsDiagramValid);
+    }
+
+    [TestMethod]
+    public void Test_SqD_IncorrectOrderOfMessages_Validity()
+    {
+        var json = File.ReadAllText("files/IncorrectOrderOfMessages.json");
+        var translator = Setup(json);
+
+        Assert.AreEqual(false, translator.IsDiagramValid);
+    }
+
+    [TestMethod]
+    public void Test_SqD_OneAltTwoRespondMessagesAfterAlt_Validity()
+    {
+        var json = File.ReadAllText("files/OneAltTwoRespondMessagesAfterAlt.json");
+        var translator = Setup(json);
 
         Assert.AreEqual(false, translator.IsDiagramValid);
     }
@@ -573,7 +540,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceChainOfResponsibilityFirstMethod()
     {
-        var json = File.ReadAllText("files/chainOfResp.json");
+        var json = File.ReadAllText("files/ChainOfResponsibility.json");
         var translator = Setup(json);
 
         var firstMethod = translator.Classes[0].Methods[0];
@@ -586,7 +553,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceChainOfResponsibilitySecondMethod()
     {
-        var json = File.ReadAllText("files/chainOfResp.json");
+        var json = File.ReadAllText("files/ChainOfResponsibility.json");
         var translator = Setup(json);
 
         var secondMethod = translator.Classes[1].Methods[0];
@@ -598,7 +565,7 @@ public class TranslatorTests : BaseTest
     [TestMethod]
     public void TestSequenceChainOfResponsibilityThirdMethod()
     {
-        var json = File.ReadAllText("files/chainOfResp.json");
+        var json = File.ReadAllText("files/ChainOfResponsibility.json");
         var translator = Setup(json);
 
         var thirdMethod = translator.Classes[2].Methods[0];
@@ -1058,6 +1025,7 @@ public class TranslatorTests : BaseTest
         Assert.AreEqual(
             "if (condition1)\ncreate object instance Class3_inst of Class3;\n" +
             "Class3_inst.hello2();\nelif (condition2)\n" +
+            "create object instance Class3_inst of Class3;\n" +
             "Class3_inst.hello3();\nend if;\n",
             secondMethod.Code);
 
@@ -1072,6 +1040,52 @@ public class TranslatorTests : BaseTest
             forthMethod.Code);
     }
 
+    [TestMethod]
+    public void Test_SqD_MessageAfterAltFromTheSameLifelineAsFirstMessageOfAlt_SecondMethod()
+    {
+        var json = File.ReadAllText("files/MessageAfterAltFromTheSameLifelineAsFirstMessageOfAlt.json");
+        var translator = Setup(json);
+
+        var secondMethod = translator.Classes[1].Methods[0];
+
+        Assert.AreEqual("m1", secondMethod.Name);
+        Assert.AreEqual(
+            "if (condition1)\n" +
+            "create object instance C_inst of C;\n" +
+            "C_inst.m2();\n" +
+            "elif (condition2)\n" +
+            "create object instance C_inst of C;\n" +
+            "C_inst.m3();\n" +
+            "end if;\n" +
+            "create object instance C_inst of C;\n" +
+            "C_inst.m4();\n",
+            secondMethod.Code);
+    }
+
+    [TestMethod]
+    public void Test_SqD_MessageAfterAltFromTheSameLifelineAsFirstMessageBeforeAlt_FirstAndSecondMethod()
+    {
+        var json = File.ReadAllText("files/MessageAfterAltFromTheSameLifelineAsFirstMessageBeforeAlt.json");
+        var translator = Setup(json);
+
+        var firstMethod = translator.Classes[0].Methods[0];
+        var secondMethod = translator.Classes[1].Methods[0];
+
+        Assert.AreEqual(Translator.FirstMethodName, firstMethod.Name);
+        Assert.AreEqual(
+            "create object instance B_inst of B;\nB_inst.m1();\ncreate object instance C_inst of C;\nC_inst.m4();\n",
+            firstMethod.Code);
+        Assert.AreEqual("m1", secondMethod.Name);
+        Assert.AreEqual(
+            "if (condition1)\n" +
+            "create object instance C_inst of C;\n" +
+            "C_inst.m2();\n" +
+            "elif (condition2)\n" +
+            "create object instance C_inst of C;\n" +
+            "C_inst.m3();\n" +
+            "end if;\n",
+            secondMethod.Code);
+    }
 
     [TestMethod]
     public void TestSequenceEmptyOpt_AllMethods()
@@ -1092,53 +1106,4 @@ public class TranslatorTests : BaseTest
             "if (condition1)\nend if;\n",
             secondMethod.Code);
     }
-
-
-    // advanced
-    // [TestMethod]
-    public void TestSequenceFowlerUmlDistilledImprovedFirstMethod()
-    {
-        var json = File.ReadAllText("files/FowlerUMLDistilledImproved.json");
-        var translator = Setup(json);
-
-        var method = translator.Classes[0].Methods[0];
-
-        // Assert.AreEqual(true, visitor.OalProgram.IsDiagramValid);
-        Assert.AreEqual(Translator.FirstMethodName, method.Name);
-        Assert.AreEqual(
-            "create object instance Careful_inst of Careful;\n" +
-            "Careful_inst.hello1();\n" +
-            "while (for each line item)\n" +
-            "Careful_inst.hello2();\n" +
-            "create object instance Regular_inst of Regular;\n" +
-            "Regular_inst.hello3();\n" +
-            "if (value > $10000)\n" +
-            "Careful_inst.dispatch();\n" +
-            "else\n" +
-            "Regular_inst.dispatch();\n" +
-            "end if;\n" +
-            "Careful_inst.hello5();\n" +
-            "end while;\n" +
-            "create object instance Regular_inst of Regular;\n" +
-            "Regular_inst.hello6();\n" +
-            "if (needs confirmation)\n" +
-            "create object instance Messenger_inst of Messenger;\n" +
-            "Messenger_inst.confirm();\n" +
-            "Regular_inst.hello7();\n" +
-            "Careful_inst.hello8();\n" +
-            "end if;\n",
-            method.Code);
-    }
-
-    // future:
-    // [TestMethod]
-    // public void TestSequenceHelloMessageWholeCode()
-    // {
-    //     var json = File.ReadAllText("files/HelloMessage.json");
-    //     var visitor = Setup(json);
-    //
-    //     Assert.AreEqual("create object instance Class2_inst of Class2;\nClass2_inst.hello();\n"
-    //         , visitor.OalProgram.Code);
-    // }
-    //
 }

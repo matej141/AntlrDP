@@ -24,8 +24,8 @@ public class OalCodeTests : BaseTest
         var obtainedClasses = oalCode.Classes;
 
         Assert.AreEqual(2, obtainedClasses.Count);
-        Assert.AreEqual("Class1", obtainedClasses[0].Name);
-        Assert.AreEqual("Class2", obtainedClasses[1].Name);
+        Assert.AreEqual("Class1", obtainedClasses[0].Body);
+        Assert.AreEqual("Class2", obtainedClasses[1].Body);
     }
 
     [TestMethod]
@@ -38,7 +38,7 @@ public class OalCodeTests : BaseTest
         var class1 = oalCode.CodeElements[0];
         var class2 = oalCode.CodeElements[1];
 
-        Assert.AreEqual("hello", obtainedMethod.Name);
+        Assert.AreEqual("hello", obtainedMethod.Body);
         Assert.AreEqual(class1, obtainedMethod.SenderClass);
         Assert.AreEqual(class2, obtainedMethod.ReceiverClass);
     }
@@ -50,7 +50,7 @@ public class OalCodeTests : BaseTest
         var oalCode = Setup(json);
 
         var obtainedFragment = (Statement)oalCode.CodeElements[2];
-        Assert.AreEqual("condition1", obtainedFragment.Name);
+        Assert.AreEqual("condition1", obtainedFragment.Body);
     }
 
     [TestMethod]
@@ -84,7 +84,7 @@ public class OalCodeTests : BaseTest
         var methodCallObj = new MethodCall();
         Assert.AreEqual(1, obtainedFragment.StatementElements.Count);
         Assert.IsInstanceOfType(methodCallObj, fragmentElement.GetType());
-        Assert.AreEqual("hello1", fragmentElement.Name);
+        Assert.AreEqual("hello1", fragmentElement.Body);
     }
 
     [TestMethod]
@@ -113,7 +113,7 @@ public class OalCodeTests : BaseTest
         var ifFragmentObj = new IfStatement();
 
         Assert.IsInstanceOfType(ifFragmentObj, ifStatementElement.StatementType.GetType());
-        Assert.AreEqual("value > $10000", ifStatementElement.Name);
+        Assert.AreEqual("value > $10000", ifStatementElement.Body);
         Assert.IsInstanceOfType(methodCallObj, ifStatementElement.StatementElements[0].GetType());
     }
 
@@ -130,9 +130,9 @@ public class OalCodeTests : BaseTest
         var elseFragmentObj = new ElseStatement();
 
         Assert.IsInstanceOfType(elseFragmentObj, elseStatementElement.StatementType.GetType());
-        Assert.AreEqual("else", elseStatementElement.Name);
+        Assert.AreEqual("else", elseStatementElement.Body);
         Assert.IsInstanceOfType(methodCallObj, elseStatementElement.StatementElements[0].GetType());
-        Assert.AreEqual("dispatch", elseStatementElement.StatementElements[0].Name);
+        Assert.AreEqual("dispatch", elseStatementElement.StatementElements[0].Body);
     }
 
     [TestMethod]
@@ -179,7 +179,7 @@ public class OalCodeTests : BaseTest
 
         Assert.AreEqual(2, nestedWhileStatement.StatementElements.Count);
         Assert.IsInstanceOfType(whileFragmentObj, nestedWhileStatement.StatementType.GetType());
-        Assert.AreEqual("condition2", nestedWhileStatement.Name);
+        Assert.AreEqual("condition2", nestedWhileStatement.Body);
         Assert.IsInstanceOfType(statementObj, nestedWhileStatement.StatementElements[0].GetType());
     }
 
@@ -196,10 +196,10 @@ public class OalCodeTests : BaseTest
         var methodCallObj = new MethodCall();
 
         Assert.IsInstanceOfType(ifFragmentObj, nestedIfStatement.StatementType.GetType());
-        Assert.AreEqual("condition3", nestedIfStatement.Name);
+        Assert.AreEqual("condition3", nestedIfStatement.Body);
         Assert.AreEqual(1, nestedIfStatement.StatementElements.Count);
         Assert.IsInstanceOfType(methodCallObj, nestedIfStatement.StatementElements[0].GetType());
-        Assert.AreEqual("hello1", nestedIfStatement.StatementElements[0].Name);
+        Assert.AreEqual("hello1", nestedIfStatement.StatementElements[0].Body);
     }
 
     [TestMethod]
@@ -217,10 +217,10 @@ public class OalCodeTests : BaseTest
         var elifFragmentObj = new ElifStatement();
 
         Assert.IsInstanceOfType(elifFragmentObj, nestedElifStatement.StatementType.GetType());
-        Assert.AreEqual("condition4", nestedElifStatement.Name);
+        Assert.AreEqual("condition4", nestedElifStatement.Body);
         Assert.AreEqual(1, nestedElifStatement.StatementElements.Count);
         Assert.IsInstanceOfType(methodCallObj, nestedElifStatement.StatementElements[0].GetType());
-        Assert.AreEqual("hello2", nestedElifStatement.StatementElements[0].Name);
+        Assert.AreEqual("hello2", nestedElifStatement.StatementElements[0].Body);
     }
 
 
@@ -236,7 +236,7 @@ public class OalCodeTests : BaseTest
 
         Assert.AreEqual(4, oalCode.CodeElements.Count);
         Assert.IsInstanceOfType(ifStatementObj, obtainedIfStatement.StatementType.GetType());
-        Assert.AreEqual("condition1", obtainedIfStatement.Name);
+        Assert.AreEqual("condition1", obtainedIfStatement.Body);
         Assert.AreEqual(2, obtainedIfStatement.StatementElements.Count);
     }
 
@@ -250,7 +250,7 @@ public class OalCodeTests : BaseTest
         var elifStatementObj = new ElifStatement();
 
         Assert.IsInstanceOfType(elifStatementObj, obtainedElifStatement.StatementType.GetType());
-        Assert.AreEqual("condition2", obtainedElifStatement.Name);
+        Assert.AreEqual("condition2", obtainedElifStatement.Body);
         Assert.AreEqual(1, obtainedElifStatement.StatementElements.Count);
         Assert.AreEqual(true, obtainedElifStatement.IsLast);
     }
@@ -267,8 +267,8 @@ public class OalCodeTests : BaseTest
 
         Assert.IsInstanceOfType(parStatementObj, obtainedFirstParStatement.StatementType.GetType());
         Assert.IsInstanceOfType(parStatementObj, obtainedLastParStatement.StatementType.GetType());
-        Assert.AreEqual("", obtainedFirstParStatement.Name);
-        Assert.AreEqual("", obtainedLastParStatement.Name);
+        Assert.AreEqual("", obtainedFirstParStatement.Body);
+        Assert.AreEqual("", obtainedLastParStatement.Body);
         
         Assert.AreEqual(1, obtainedFirstParStatement.StatementElements.Count);
         Assert.AreEqual(1, obtainedLastParStatement.StatementElements.Count);

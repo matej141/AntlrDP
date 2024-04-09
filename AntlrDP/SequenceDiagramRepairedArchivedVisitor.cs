@@ -87,7 +87,7 @@ public class SequenceDiagramRepairedArchivedVisitor : SequenceDiagramBaseVisitor
     //     var receiveEventId = context.receiveEvent().xmiIdRef().value().GetText();
     //     var sendEventId =context.sendEvent().xmiIdRef().value().GetText();
     //     return new OalMethodCall
-    //         { Name = name, ReceiverOccurrenceId = receiveEventId, SenderOccurrenceId = sendEventId };
+    //         { Body = name, ReceiverOccurrenceId = receiveEventId, SenderOccurrenceId = sendEventId };
     // }
 
     private static OalClass CreateOalClass(SequenceDiagramParser.PairContext[] pairContexts)

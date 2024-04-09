@@ -6,16 +6,17 @@ using AntlrDP.OalCodeElements.FragmentTypes;
 
 namespace AntlrDP.Translation;
 
-public class Translator
+public sealed class Translator
 {
     private OalCode OalCode { get; }
-    public List<TranslationClass> Classes { get; set; }
+    public List<TranslationClass> Classes = new();
     public const string FirstMethodName = "FirstMethod";
-    private bool _firstMethodCallUsed = false;
+    private bool _firstMethodCallUsed; // false by default
     private TranslationContext? CurrentContext { get; set; }
     public bool IsDiagramValid = true;
-    private bool _firstStatementNeedToBeHandled = true;
+    private bool _firstStatementNeedsToBeHandled = true;
     private readonly bool _areSelfMessagesBlankMethods;
+    private const string InvalidDiagramTxt = "Sequence Diagram is Invalid";
 
     public Translator(OalCode oalCode, bool areSelfMessagesBlankMethods = true)
     {
@@ -46,19 +47,39 @@ public class Translator
         switch (codeElement)
         {
             case MethodCall methodCall:
+                if (!CheckMagic(OalCode.CodeElements, methodCall))
+                {
+                    FinishDiagramAsInvalid();
+                    return;
+                }
+
                 CurrentContext = TranslateMethodCall(methodCall, CurrentContext);
                 break;
             case Statement statement:
                 ProcessStatement(statement);
-                _firstStatementNeedToBeHandled = false;
+                _firstStatementNeedsToBeHandled = false;
                 break;
         }
     }
 
     private void ProcessStatement(Statement statement)
     {
+        if (statement.StatementType is WhileStatement or ForStatement && !statement.IsFirst)
+        {
+            // Todo: pridat do DP ako dalsi invalid... Ked je fragment LOOP a ma viacero statements...
+            FinishDiagramAsInvalid();
+            return;
+        }
+
         if (statement.StatementElements.Count == 0)
         {
+            if (CurrentContext == null)
+            {
+                // Todo: Pridat do DP mozno aj tento pripad... Ked prvy element je prazdny fragment...
+                FinishDiagramAsInvalid();
+                return;
+            }
+
             HandleEmptyStatement(statement, CurrentContext);
             return;
         }
@@ -70,7 +91,7 @@ public class Translator
         }
         else
         {
-            var newContext = TranslateStatement(statement, CurrentContext, _firstStatementNeedToBeHandled);
+            var newContext = TranslateStatement(statement, CurrentContext, _firstStatementNeedsToBeHandled);
             UpdateCurrentContext(newContext);
         }
     }
@@ -83,7 +104,7 @@ public class Translator
 
     private void OrderMethodsInClasses()
     {
-        var methodCallNames = OalCode.MethodCalls.Select(obj => obj.Name).ToList();
+        var methodCallNames = OalCode.MethodCalls.Select(obj => obj.Body).ToList();
         methodCallNames.Insert(0, FirstMethodName);
 
         foreach (var translationClass in Classes)
@@ -118,18 +139,22 @@ public class Translator
         return obj switch
         {
             TranslationMethod translationMethod => translationMethod.Name,
-            MethodCall methodCall => methodCall.Name,
+            MethodCall methodCall => methodCall.Body,
             _ => throw new ArgumentException("Unsupported type")
         };
     }
 
-    private TranslationContext InitializeFirstMethodCall(TranslationClass senderClass,
-        TranslationClass receiverClass,
-        string instanceName, string methodName)
+    private TranslationContext InitializeFirstMethodCall(MethodCall methodCall)
     {
+        var (senderClass, receiverClass, instanceName, methodName) = GetBasicElementsOfMethodCall(methodCall);
+        if (senderClass == null || receiverClass == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
+
         var context = new TranslationContext
         {
-            MethodNames = new List<string> { FirstMethodName },
+            MethodName = FirstMethodName,
             Sender = senderClass,
             Receiver = receiverClass,
             CurrentCode = ""
@@ -152,46 +177,64 @@ public class Translator
             { Name = methodName, Code = "", IsSelfMethod = senderClass == receiverClass };
         receiverClass.Methods.Add(receiverMethod);
         context.Instances.Add(receiverClass);
-        context.LastMethodsCalled.Add(methodName);
+        context.LastMethodCalled = methodName;
 
         _firstMethodCallUsed = true;
         return context;
     }
 
-    protected virtual TranslationContext UpdateSenderMethods(TranslationContext context)
+    private (TranslationClass? senderClass, TranslationClass? receiverClass, string instanceName, string methodName)
+        GetBasicElementsOfMethodCall(MethodCall methodCall)
     {
-        foreach (var method in context.MethodNames)
-        {
-            var senderMethod =
-                context.Sender.Methods.Find(translationMethod => translationMethod.Name == method);
-            if (senderMethod != null)
-            {
-                var ind = context.Sender.Methods.FindIndex(translationMethod => translationMethod.Name == method);
-                context.Sender.Methods.RemoveAll(translationMethod => translationMethod.Name == method);
-                senderMethod = new TranslationMethod
-                    { Name = method, Code = context.CurrentCode, Instances = context.Instances };
-                context.Sender.Methods.Insert(ind, senderMethod);
-            }
-            else
-            {
-                senderMethod = new TranslationMethod
-                    { Name = method, Code = context.CurrentCode, Instances = context.Instances };
+        var senderClass = GetSenderClass(methodCall);
+        var receiverClass = GetReceiverClass(methodCall);
+        var instanceName = GetInstanceName(methodCall);
+        var methodName = methodCall.Body;
+        return (senderClass, receiverClass, instanceName, methodName);
+    }
 
-                context.Sender.Methods.Add(senderMethod);
-            }
+    private TranslationContext UpdateSenderMethods(TranslationContext? context)
+    {
+        if (context == null)
+        {
+            return FinishDiagramAsInvalid();
         }
+        
+        var senderMethod =
+            context.Sender.Methods.Find(translationMethod => translationMethod.Name == context.MethodName);
+        if (senderMethod != null)
+        {
+            var ind = context.Sender.Methods.FindIndex(
+                translationMethod => translationMethod.Name == context.MethodName);
+            context.Sender.Methods.RemoveAll(translationMethod => translationMethod.Name == context.MethodName);
+            senderMethod = new TranslationMethod
+                { Name = context.MethodName, Code = context.CurrentCode, Instances = context.Instances };
+            context.Sender.Methods.Insert(ind, senderMethod);
+        }
+        else
+        {
+            senderMethod = new TranslationMethod
+                { Name = context.MethodName, Code = context.CurrentCode, Instances = context.Instances };
+
+            context.Sender.Methods.Add(senderMethod);
+        }
+
 
         return context;
     }
 
-    private TranslationContext InitializeNewContext(TranslationClass senderClass, TranslationClass receiverClass,
-        string instanceName,
-        string methodName, TranslationContext context)
+    private TranslationContext InitializeNewContext(MethodCall methodCall, TranslationContext context)
     {
-        var newMethodNames = new List<string>(context.LastMethodsCalled);
+        var (senderClass, receiverClass, instanceName, methodName) = GetBasicElementsOfMethodCall(methodCall);
+        if (senderClass == null || receiverClass == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
+
+        var newMethodNames = context.LastMethodCalled;
         context = new TranslationContext
         {
-            MethodNames = newMethodNames,
+            MethodName = newMethodNames,
             Sender = senderClass,
             Receiver = receiverClass,
             CurrentCode = ""
@@ -200,9 +243,9 @@ public class Translator
         {
             context.CurrentCode += CreateInstance(receiverClass, instanceName);
         }
-        
+
         context.Instances.Add(receiverClass);
-        
+
         context.CurrentCode += CreateCall(instanceName, methodName);
 
         if (context.Sender == receiverClass && !_areSelfMessagesBlankMethods)
@@ -217,13 +260,18 @@ public class Translator
         {
             receiverClass.Methods.Add(receiverMethod);
         }
-        
-        context.LastMethodsCalled.Add(methodName);
+
+        context.LastMethodCalled = methodName;
         return context;
     }
 
-    private TranslationMethod FindLastMethodOfSenderClass(TranslationClass senderClass)
+    private TranslationMethod? FindLastMethodOfSenderClass(TranslationClass senderClass)
     {
+        if (senderClass.Methods.Count == 0)
+        {
+            return null;
+        }
+
         var lastMethod = senderClass.Methods.Last();
         foreach (var method in senderClass.Methods.AsEnumerable().Reverse())
         {
@@ -239,10 +287,16 @@ public class Translator
         return lastMethod;
     }
 
-    private TranslationContext InitializeContextFromLastMethodOfSenderClass(TranslationClass senderClass,
-        TranslationClass receiverClass, string instanceName,
-        string methodName, TranslationContext context)
+    private TranslationContext InitializeContextFromLastMethodOfSenderClass(MethodCall methodCall,
+        TranslationContext context)
     {
+        var (senderClass, receiverClass, instanceName, methodName) =
+            GetBasicElementsOfMethodCall(methodCall);
+        if (senderClass == null || receiverClass == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
+
         var lastMethod = FindLastMethodOfSenderClass(senderClass);
         if (lastMethod == null)
         {
@@ -251,7 +305,7 @@ public class Translator
 
         context = new TranslationContext
         {
-            MethodNames = new List<string> { lastMethod.Name },
+            MethodName = lastMethod.Name,
             Sender = senderClass,
             Receiver = receiverClass,
             CurrentCode = lastMethod.Code,
@@ -278,8 +332,8 @@ public class Translator
         {
             receiverClass.Methods.Add(receiverMethod);
         }
-        
-        context.LastMethodsCalled.Add(methodName);
+
+        context.LastMethodCalled = methodName;
         return context;
     }
 
@@ -289,7 +343,7 @@ public class Translator
         UpdateSenderMethods(context);
         context = new TranslationContext
         {
-            MethodNames = new List<string> { methodName },
+            MethodName = methodName,
             Sender = senderAndReceiverClass,
             Receiver = senderAndReceiverClass,
             CurrentCode = ""
@@ -304,43 +358,70 @@ public class Translator
 
         if (senderClass == null || receiverClass == null)
         {
-            return context;
-        }
-
-        var instanceName = CreateNameOfClassInstance(receiverClass);
-        if (senderClass == receiverClass)
-        {
-            instanceName = "self";
+            return FinishDiagramAsInvalid();
         }
 
         if (!_firstMethodCallUsed)
         {
-            context = InitializeFirstMethodCall(senderClass, receiverClass, instanceName, methodCall.Name);
+            context = InitializeFirstMethodCall(methodCall);
         }
         else if (senderClass != context?.Sender && senderClass == context?.Receiver)
         {
             context = UpdateSenderMethods(context);
-            context = InitializeNewContext(senderClass, receiverClass, instanceName, methodCall.Name, context);
+            context = InitializeNewContext(methodCall, context);
         }
 
         else if (senderClass != context?.Sender)
         {
+            if (OrderOfSenderClassesIsWrong(context, senderClass)) return FinishDiagramAsInvalid();
             context = UpdateSenderMethods(context);
-            context = InitializeContextFromLastMethodOfSenderClass(senderClass, receiverClass, instanceName,
-                methodCall.Name, context);
+            context = InitializeContextFromLastMethodOfSenderClass(methodCall, context);
         }
         else
         {
-            context = UpdateTranslationContext(instanceName, methodCall.Name, receiverClass, context);
+            context = UpdateTranslationContext(methodCall, context);
         }
 
         context.LastReceiver = receiverClass;
         return context;
     }
 
-    private TranslationContext UpdateTranslationContext(string instanceName, string methodName,
-        TranslationClass receiverClass, TranslationContext context)
+    private bool OrderOfSenderClassesIsWrong(TranslationContext? context, TranslationClass senderClass)
     {
+        var indexOfNewSenderClass = Classes.FindIndex(@class => @class == senderClass);
+        var indexOfPreviousSenderClass = Classes.FindIndex(@class => @class == context?.Sender);
+        if (indexOfNewSenderClass > indexOfPreviousSenderClass)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private TranslationContext FinishDiagramAsInvalid()
+    {
+        IsDiagramValid = false;
+        return new TranslationContext();
+    }
+
+    private string GetInstanceName(MethodCall methodCall)
+    {
+        if (GetSenderClass(methodCall) == GetReceiverClass(methodCall))
+        {
+            return "self";
+        }
+
+        return CreateNameOfClassInstance(GetReceiverClass(methodCall));
+    }
+
+    private TranslationContext UpdateTranslationContext(MethodCall methodCall, TranslationContext context)
+    {
+        var (_, receiverClass, instanceName, methodName) = GetBasicElementsOfMethodCall(methodCall);
+        if (receiverClass == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
+
         if (!context.Instances.Contains(receiverClass))
         {
             if (context.Sender != receiverClass)
@@ -351,7 +432,8 @@ public class Translator
         }
 
         context.CurrentCode += CreateCall(instanceName, methodName);
-        context.LastMethodsCalled.Add(methodName);
+        context.LastMethodCalled = methodName;
+        context.Receiver = receiverClass;
         if (context.Sender == receiverClass && !_areSelfMessagesBlankMethods)
         {
             context = InitSelfMethod(methodName, receiverClass, context);
@@ -360,7 +442,10 @@ public class Translator
 
         var receiverMethod = new TranslationMethod
             { Name = methodName, Code = "", IsSelfMethod = context.Sender == receiverClass };
-        receiverClass.Methods.Add(receiverMethod);
+        if (!receiverClass.Methods.Contains(receiverMethod))
+        {
+            receiverClass.Methods.Add(receiverMethod);
+        }
 
         return context;
     }
@@ -385,13 +470,18 @@ public class Translator
         foreach (var oalClass in OalCode.Classes)
         {
             var translationClass = new TranslationClass
-                { Id = oalClass.Id, Name = oalClass.Name, Methods = new List<TranslationMethod>() };
+                { Id = oalClass.Id, Name = oalClass.Body, Methods = new List<TranslationMethod>() };
             Classes.Add(translationClass);
         }
     }
 
-    private static string CreateNameOfClassInstance(TranslationClass receiverClass)
+    private static string CreateNameOfClassInstance(TranslationClass? receiverClass)
     {
+        if (receiverClass == null)
+        {
+            return "";
+        }
+
         return receiverClass.Name + "_inst";
     }
 
@@ -419,130 +509,238 @@ public class Translator
                     CurrentContext?.Instances.Clear();
                     break;
                 case Statement statementElement:
-                {
                     var newContext = TranslateStatement(statementElement, CurrentContext);
                     UpdateCurrentContext(newContext);
+                    break;
+            }
+        }
+
+        if (CurrentContext == null) return;
+
+        UpdateContextAfterProcessingStatementElements(statement, CurrentContext);
+    }
+
+    private void UpdateCurrentContext(TranslationContext newContext)
+    {
+        if (CurrentContext == null || !IsDiagramValid) return;
+        if (CurrentContext.Sender != newContext.Sender)
+        {
+            UpdateSenderMethods(newContext);
+            var originalInstances = CurrentContext.Instances;
+            CurrentContext = new TranslationContext(newContext)
+            {
+                Instances = originalInstances
+            };
+            return;
+        }
+
+        CurrentContext.CurrentCode += newContext.CurrentCode;
+        CurrentContext.LastMethodCalled = newContext.LastMethodCalled;
+    }
+
+    private TranslationContext TranslateStatement(Statement statement, TranslationContext originalContext,
+        bool firstStatementNeedsToBeHandled = false)
+    {
+        UpdateSenderMethods(originalContext);
+        if (statement.StatementElements.Count == 0)
+        {
+            HandleEmptyStatement(statement, originalContext);
+            return originalContext;
+        }
+
+        var properContext = new TranslationContext(originalContext)
+        {
+            CurrentCode = ""
+        };
+
+        if (DiagramIsInvalidInStatement(statement, originalContext)) return FinishDiagramAsInvalid();
+
+        properContext =
+            ProcessStatementElements(statement, originalContext, firstStatementNeedsToBeHandled, properContext);
+
+        properContext = UpdateContextAfterProcessingStatementElements(statement, properContext);
+
+        return properContext;
+    }
+
+    private TranslationContext UpdateContextAfterProcessingStatementElements(Statement statement,
+        TranslationContext properContext)
+    {
+        properContext = UpdateSenderMethods(properContext);
+        var firstMethodInStatement =
+            (MethodCall?)statement.StatementElements.FirstOrDefault(element => element is MethodCall);
+        if (firstMethodInStatement != null)
+            return UpdateContextByFirstMethodInStatement(statement, properContext, firstMethodInStatement);
+        properContext.CurrentCode = CreateTxtOfStatement(statement) + properContext.CurrentCode +
+                                    GetEndOfStatement(statement);
+        return properContext;
+    }
+
+    private TranslationContext UpdateContextByFirstMethodInStatement(Statement statement,
+        TranslationContext properContext,
+        MethodCall firstMethodInStatement)
+    {
+        var methods = Classes.Find(@class => firstMethodInStatement.SenderClass.Id == @class.Id)?.Methods;
+        if (methods == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
+
+        var method = methods.First();
+
+        properContext.CurrentCode = CreateTxtOfStatement(statement) + method.Code +
+                                    GetEndOfStatement(statement);
+        properContext.MethodName =  method.Name;
+        var translationSenderClass = Classes.Find(@class => firstMethodInStatement.SenderClass.Id == @class.Id);
+        var translationReceiverClass = Classes.Find(@class => firstMethodInStatement.ReceiverClass.Id == @class.Id);
+        if (translationSenderClass == null || translationReceiverClass == null)
+        {
+            return FinishDiagramAsInvalid();
+        }
+
+        properContext.Sender = translationSenderClass;
+        properContext.Receiver = translationReceiverClass;
+
+        return properContext;
+    }
+
+    private bool CheckMagic(List<OalCodeElement> elements, MethodCall methodCall)
+    {
+        var indexOfMethodCallInElements = elements.FindIndex(element => element == methodCall);
+        if (indexOfMethodCallInElements == 0)
+        {
+            return true;
+        }
+
+        var previousElement = elements[indexOfMethodCallInElements - 1];
+        if (previousElement is not Statement statement)
+        {
+            return true;
+        }
+
+        if (statement.StatementElements.Count == 0)
+        {
+            return true;
+        }
+
+        var firstMethodInStatement = FindFirstMethodCallInStatement(statement);
+        if (firstMethodInStatement.SenderClass == methodCall.SenderClass)
+        {
+            return true;
+        }
+
+        var lastMethodCallInElements = FindLastMethodCallInElements(elements, indexOfMethodCallInElements);
+        if (lastMethodCallInElements == null)
+        {
+            return false;
+        }
+
+        if (lastMethodCallInElements.SenderClass == methodCall.SenderClass)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static MethodCall? FindLastMethodCallInElements(IReadOnlyList<OalCodeElement> elements,
+        int indexOfOriginalMethodCallInElements)
+    {
+        for (var i = indexOfOriginalMethodCallInElements - 1; i >= 0; i--)
+        {
+            if (elements[i] is MethodCall)
+            {
+                return (MethodCall)elements[i];
+            }
+        }
+
+        return null;
+    }
+
+    private MethodCall FindFirstMethodCallInStatement(Statement statement)
+    {
+        var firstElement = statement.StatementElements.First();
+        if (firstElement is not MethodCall methodCall)
+        {
+            return FindFirstMethodCallInStatement((Statement)firstElement);
+        }
+
+        return methodCall;
+    }
+
+    private TranslationContext ProcessStatementElements(Statement statement, TranslationContext originalContext,
+        bool firstStatementNeedsToBeHandled,
+        TranslationContext properContext)
+    {
+        var firstStatementOfTheseElementsNeedsToBeHandled = true;
+        foreach (var statementElement in statement.StatementElements)
+        {
+            switch (statementElement)
+            {
+                case MethodCall methodCall:
+                {
+                    if (!CheckMagic(statement.StatementElements, methodCall))
+                    {
+                        return FinishDiagramAsInvalid();
+                    }
+
+                    properContext = ProcessMethodCallInStatementElements(originalContext,
+                        firstStatementNeedsToBeHandled, properContext, methodCall);
+                    firstStatementNeedsToBeHandled = false;
+                    continue;
+                }
+                case Statement statementEl:
+                {
+                    properContext = ProcessStatementElementInStatementElement(properContext, statementEl,
+                        firstStatementOfTheseElementsNeedsToBeHandled);
+                    firstStatementOfTheseElementsNeedsToBeHandled = false;
                     break;
                 }
             }
         }
 
-        UpdateSenderMethods(CurrentContext);
-        var firstMethodInStatement =
-            (MethodCall?)statement.StatementElements.FirstOrDefault(element => element is MethodCall);
-        if (firstMethodInStatement == null)
-        {
-            CurrentContext.CurrentCode = CreateTxtOfStatement(statement) + CurrentContext?.CurrentCode +
-                                         GetEndOfStatement(statement);
-            return;
-        }
-
-        var method = Classes.Find(@class => firstMethodInStatement.SenderClass.Id == @class.Id).Methods.First();
-        CurrentContext.CurrentCode = CreateTxtOfStatement(statement) + method.Code +
-                                     GetEndOfStatement(statement);
-        CurrentContext.MethodNames = new List<string> { method.Name };
-    }
-
-    private void UpdateCurrentContext(TranslationContext newContext)
-    {
-        if (CurrentContext == null) return;
-        if (CurrentContext.Sender != newContext.Sender)
-        {
-            UpdateSenderMethods(newContext);
-            CurrentContext = new TranslationContext(newContext);
-            return;
-        }
-
-        CurrentContext.CurrentCode += newContext.CurrentCode;
-        CurrentContext.LastMethodsCalled = new List<string>(newContext.LastMethodsCalled);
-    }
-
-    private TranslationContext TranslateStatement(Statement statement, TranslationContext context, bool ff = false)
-    {
-        UpdateSenderMethods(context);
-        if (statement.StatementElements.Count == 0)
-        {
-            HandleEmptyStatement(statement, context);
-            return context;
-        }
-
-        var firstStatementNeedToBeHandled = true;
-        var txtOfStatement = CreateTxtOfStatement(statement);
-        var properContext = new TranslationContext(context);
-        properContext.CurrentCode = "";
-
-
-        if (CheckIfDiagramIsValid(statement, context)) return context;
-
-        properContext = ProcessStatementElements(statement, context, ff, properContext, firstStatementNeedToBeHandled);
-
-        properContext = UpdateSenderMethods(properContext);
-        var firstMethodInStatement =
-            (MethodCall?)statement.StatementElements.FirstOrDefault(element => element is MethodCall);
-        if (firstMethodInStatement == null)
-        {
-            properContext.CurrentCode = txtOfStatement + properContext.CurrentCode + GetEndOfStatement(statement);
-            return properContext;
-        }
-
-        var method = Classes.Find(@class => firstMethodInStatement.SenderClass.Id == @class.Id).Methods.First();
-        var translationSenderClass = Classes.Find(@class => firstMethodInStatement.SenderClass.Id == @class.Id);
-        var translationReceiverClass = Classes.Find(@class => firstMethodInStatement.ReceiverClass.Id == @class.Id);
-        properContext.CurrentCode = CreateTxtOfStatement(statement) + method.Code +
-                                    GetEndOfStatement(statement);
-        properContext.Sender = translationSenderClass;
-        properContext.Receiver = translationReceiverClass;
-        properContext.MethodNames = new List<string> { method.Name };
-
         return properContext;
     }
 
-    private TranslationContext ProcessStatementElements(Statement statement, TranslationContext context, bool ff,
-        TranslationContext properContext, bool firstStatementNeedToBeHandled)
+    private TranslationContext ProcessMethodCallInStatementElements(TranslationContext originalContext,
+        bool firstStatementNeedsToBeHandled, TranslationContext properContext, MethodCall methodCall)
     {
-        foreach (var statementElement in statement.StatementElements)
+        if (GetSenderClass(methodCall) != originalContext.Sender &&
+            GetReceiverClass(methodCall) != originalContext.Sender &&
+            firstStatementNeedsToBeHandled)
         {
-            if (statementElement is MethodCall methodCall)
-            {
-                if (GetSenderClass(methodCall) != context.Sender && GetReceiverClass(methodCall) != context.Sender &&
-                    ff)
-                {
-                    properContext.CurrentCode = context.CurrentCode;
-                    ff = false;
-                }
-
-                properContext = TranslateMethodCall(methodCall, properContext);
-                if (ff)
-                {
-                    properContext.LastMethodsCalled = new List<string> { properContext.LastMethodsCalled.Last() };
-                    ff = false;
-                }
-            }
-
-            else if (statementElement is Statement statementEl)
-            {
-                var code = properContext.CurrentCode;
-                properContext = TranslateStatement(statementEl, properContext, firstStatementNeedToBeHandled);
-                firstStatementNeedToBeHandled = false;
-                properContext.CurrentCode = code + properContext.CurrentCode;
-            }
+            properContext.CurrentCode = originalContext.CurrentCode;
+            firstStatementNeedsToBeHandled = false;
         }
 
+        properContext = TranslateMethodCall(methodCall, properContext);
+        if (!firstStatementNeedsToBeHandled) return properContext;
+        properContext.LastMethodCalled = properContext.LastMethodCalled;
+        return properContext;
+    }
+
+    private TranslationContext ProcessStatementElementInStatementElement(TranslationContext properContext,
+        Statement statementEl, bool firstStatementOfTheseElementsNeedToBeHandled)
+    {
+        var code = properContext.CurrentCode;
+        properContext = TranslateStatement(statementEl, properContext, firstStatementOfTheseElementsNeedToBeHandled);
+        properContext.CurrentCode = code + properContext.CurrentCode;
         return properContext;
     }
 
     private static void HandleEmptyStatement(Statement statement, TranslationContext context)
     {
-        var method = context.LastReceiver.Methods.Last();
-        if (method == null)
+        if (context.LastReceiver.Methods.Count == 0)
         {
             return;
         }
 
+        var method = context.LastReceiver.Methods.Last();
+
         method.Code = CreateTxtOfStatement(statement) + GetEndOfStatement(statement);
     }
 
-    private bool CheckIfDiagramIsValid(Statement statement, TranslationContext context)
+    private bool DiagramIsInvalidInStatement(Statement statement, TranslationContext context)
     {
         if (statement.StatementElements.Count == 0)
         {
@@ -558,7 +756,7 @@ public class Translator
 
     private static string CreateTxtOfStatement(Statement statement)
     {
-        var statementBody = ExtractContentWithinBrackets(statement.Name);
+        var statementBody = ExtractContentWithinBrackets(statement.Body);
         return statement.StatementType switch
         {
             WhileStatement =>
@@ -683,6 +881,11 @@ public class Translator
 
     public string GetCompleteOalCode()
     {
+        if (!IsDiagramValid)
+        {
+            return InvalidDiagramTxt;
+        }
+
         var code = new StringBuilder();
 
         foreach (var translationClass in Classes)
@@ -724,7 +927,7 @@ public class Translator
             {
                 indentation--;
                 AppendLineWithIndent(sb, line, indentation);
-                indentation--;
+                //indentation--;
                 continue;
             }
 
@@ -732,7 +935,7 @@ public class Translator
                 line.Contains(
                     "thread"))
             {
-                indentation++;
+                //indentation++;
                 AppendLineWithIndent(sb, line, indentation);
                 indentation++;
                 continue;
@@ -742,7 +945,7 @@ public class Translator
         }
     }
 
-    protected virtual void AppendLineWithIndent(StringBuilder sb, string line, int indentLevel)
+    private void AppendLineWithIndent(StringBuilder sb, string line, int indentLevel)
     {
         var indent = new string(' ', indentLevel * 4);
         sb.AppendLine($"{indent}{line}");

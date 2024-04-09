@@ -45,7 +45,10 @@
     <Content Include="bin\Debug\net7.0\files\HelloMiddleSelfMessage.json" />
     <Content Include="bin\Debug\net7.0\files\HelloSelfMessage.json" />
     <Content Include="bin\Debug\net7.0\files\HelloTwoMessages.json" />
+    <Content Include="bin\Debug\net7.0\files\IncorrectOrderOfMessages.json" />
     <Content Include="bin\Debug\net7.0\files\Mediator.json" />
+    <Content Include="bin\Debug\net7.0\files\MessageAfterAltFromTheSameLifelineAsFirstMessageBeforeAlt.json" />
+    <Content Include="bin\Debug\net7.0\files\MessageAfterAltFromTheSameLifelineAsFirstMessageOfAlt.json" />
     <Content Include="bin\Debug\net7.0\files\NestedAltInLoop.json" />
     <Content Include="bin\Debug\net7.0\files\NestedAltInLoopWithMessages.json" />
     <Content Include="bin\Debug\net7.0\files\NestedLoopAndAltInLoop.json" />

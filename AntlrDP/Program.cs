@@ -8,7 +8,7 @@ namespace AntlrDP
     {
         private static void Main()
         {
-            var json = File.ReadAllText("files/Evaluation_files_from_MZ/absFactoryPara.json");
+            var json = File.ReadAllText("files/MessageAfterAltFromTheSameLifelineAsFirstMessageBeforeAlt.json");
             var inputStream = new AntlrInputStream(json);
             var speakLexer = new SequenceDiagramLexer(inputStream);
             var commonTokenStream = new CommonTokenStream(speakLexer);
@@ -28,7 +28,7 @@ namespace AntlrDP
             var sequenceDiagram = newVisitor.SequenceDiagram;
 
             var oalCode = new OalCode(sequenceDiagram);
-            var translator = new Translator(oalCode, false);
+            var translator = new Translator(oalCode);
             var animArchAnimationObject = translator.CreateAnimArchAnimationObject();
             var jsonGenerated =
                 Newtonsoft.Json.JsonConvert.SerializeObject(animArchAnimationObject);

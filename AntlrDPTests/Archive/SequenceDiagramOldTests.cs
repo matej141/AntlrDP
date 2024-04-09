@@ -707,7 +707,7 @@ public class SequenceDiagramOldTests
     //     var visitor = Setup(json);
     //
     //     const string jsonExpected =
-    //         "{\"Code\":\"create object instance Class2_inst of Class2;\\nClass2_inst.helloClass2();\\ncreate object instance Class3_inst of Class3;\\nClass3_inst.helloClass3();\\ncreate object instance Class1_inst of Class1;\\nClass1_inst.helloClass1();\\n\",\"AnimationName\":null,\"MethodsCodes\":[{\"Name\":\"Class1\",\"Methods\":[{\"Name\":\"helloClass2\",\"Code\":\"create object instance Class2_inst of Class2;\\nClass2_inst.helloClass2();\\n\"}]},{\"Name\":\"Class2\",\"Methods\":[{\"Name\":\"helloClass3\",\"Code\":\"create object instance Class3_inst of Class3;\\nClass3_inst.helloClass3();\\n\"}]},{\"Name\":\"Class3\",\"Methods\":[{\"Name\":\"helloClass1\",\"Code\":\"create object instance Class1_inst of Class1;\\nClass1_inst.helloClass1();\\n\"}]}]}";
+    //         "{\"Code\":\"create object instance Class2_inst of Class2;\\nClass2_inst.helloClass2();\\ncreate object instance Class3_inst of Class3;\\nClass3_inst.helloClass3();\\ncreate object instance Class1_inst of Class1;\\nClass1_inst.helloClass1();\\n\",\"AnimationName\":null,\"MethodsCodes\":[{\"Body\":\"Class1\",\"Methods\":[{\"Body\":\"helloClass2\",\"Code\":\"create object instance Class2_inst of Class2;\\nClass2_inst.helloClass2();\\n\"}]},{\"Body\":\"Class2\",\"Methods\":[{\"Body\":\"helloClass3\",\"Code\":\"create object instance Class3_inst of Class3;\\nClass3_inst.helloClass3();\\n\"}]},{\"Body\":\"Class3\",\"Methods\":[{\"Body\":\"helloClass1\",\"Code\":\"create object instance Class1_inst of Class1;\\nClass1_inst.helloClass1();\\n\"}]}]}";
     //     var jsonGenerated =
     //         Newtonsoft.Json.JsonConvert.SerializeObject(visitor.OalProgram.CreateAnimArchAnimationObject());
     //     Assert.AreEqual(jsonExpected, jsonGenerated);
@@ -720,7 +720,7 @@ public class SequenceDiagramOldTests
     //     var visitor = Setup(json);
     //
     //     const string jsonExpected =
-    //         "{\"Code\":\"create object instance Class2_inst of Class2;\\nwhile (a>5)\\r\\nClass2_inst.hello();\\n\",\"AnimationName\":null,\"MethodsCodes\":[{\"Name\":\"Class1\",\"Methods\":[{\"Name\":\"hello\",\"Code\":\"create object instance Class2_inst of Class2;\\nwhile (a>5)\\r\\nClass2_inst.hello();\\n\"}]}]}";
+    //         "{\"Code\":\"create object instance Class2_inst of Class2;\\nwhile (a>5)\\r\\nClass2_inst.hello();\\n\",\"AnimationName\":null,\"MethodsCodes\":[{\"Body\":\"Class1\",\"Methods\":[{\"Body\":\"hello\",\"Code\":\"create object instance Class2_inst of Class2;\\nwhile (a>5)\\r\\nClass2_inst.hello();\\n\"}]}]}";
     //     var jsonGenerated =
     //         Newtonsoft.Json.JsonConvert.SerializeObject(visitor.OalProgram.CreateAnimArchAnimationObject());
     //     Assert.AreEqual(jsonExpected, jsonGenerated);
