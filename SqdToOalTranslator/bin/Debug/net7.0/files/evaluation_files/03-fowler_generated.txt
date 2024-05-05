@@ -1,0 +1,33 @@
+﻿class Order
+    method StartMethod()
+        for each line item
+            if (value > $10000)
+                create object instance Careful_inst of Careful;
+                Careful_inst.dispatch();
+            else
+                create object instance Regular_inst of Regular;
+                Regular_inst.dispatch();
+            end if;
+	end for;
+        if (needs confirmation)
+            create object instance Messenger_inst of Messenger;
+            Messenger_inst.confirm();
+        end if;
+    end method;
+end class;
+
+class Careful
+    method dispatch()
+    end method;
+end class;
+
+class Regular
+    method dispatch()
+    end method;
+end class;
+
+class Messenger
+    method confirm()
+    end method;
+end class;
+

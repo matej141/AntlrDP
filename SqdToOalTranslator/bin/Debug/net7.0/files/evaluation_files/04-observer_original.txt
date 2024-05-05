@@ -1,0 +1,74 @@
+﻿class Client
+    method StartCase()
+        create object instance Vet of Veterinarian;
+	create list Vet.RegisteredAnimals of Observer;
+	create object instance Husky of Dog;
+	Husky.Veterinarian = Vet;
+	Husky.IsVaccinated = FALSE;
+	Vet.Register(Husky, "1.4.2022");
+	create object instance PersianCat of Cat;
+	PersianCat.Veterinarian = Vet;
+	PersianCat.IsVaccinated = FALSE;
+	Vet.Register(PersianCat, "2.4.2022");
+	Vet.SetDate("1.4.2022");
+	Vet.SetDate("2.4.2022");
+    end method;
+end class;
+
+class Veterinarian
+    string CurrentDate;
+    Observer[] RegisteredAnimals;
+    method Register(Observer Obs, string Date)
+        add Obs to self.RegisteredAnimals;
+	Obs.SetVaccinationDate(Date);
+    end method;
+
+    method Unregister(Observer Obs)
+        remove Obs from self.RegisteredAnimals;
+        Obs.SetVaccinationDate(UNDEFINED);
+    end method;
+
+    method VaccinateAnimals()
+        for each Animal in self.RegisteredAnimals
+	    Animal.ReceiveVaccine(self.CurrentDate);
+	end for;
+    end method;
+
+    method SetDate(string Date)
+	self.CurrentDate = Date;
+	self.VaccinateAnimals();
+    end method;
+end class;
+
+class Dog
+    Subject Veterinarian;
+    bool IsVaccinated;
+    string Name;
+    string VaccinationDate;
+    method ReceiveVaccine(string Date) 
+        if (VaccinationDate ==  Date)
+	    self.IsVaccinated = TRUE;
+	end if;
+    end method;
+
+    method SetVaccinationDate(string Date)
+	self.VaccinationDate = Date;
+    end method;
+end class;
+
+class Cat
+    Subject Veterinarian;
+    bool IsVaccinated;
+    string Name;
+    string VaccinationDate;
+    method ReceiveVaccine(string Date) 
+        if (VaccinationDate ==  Date)
+	    self.IsVaccinated = TRUE;
+	end if;
+    end method;
+
+    method SetVaccinationDate(string Date)
+        self.VaccinationDate = Date;
+    end method;
+end class;
+

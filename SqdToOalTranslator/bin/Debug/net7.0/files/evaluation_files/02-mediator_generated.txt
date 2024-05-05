@@ -1,0 +1,24 @@
+﻿class ClassA
+    method StartMethod()
+        create object instance ClassB_inst of ClassB;
+        ClassB_inst.methodB1();
+        create object instance ClassC_inst of ClassC;
+        ClassC_inst.methodC();
+        ClassB_inst.methodB2();
+    end method;
+end class;
+
+class ClassB
+    method methodB1()
+    end method;
+
+    method methodB2()
+    end method;
+end class;
+
+class ClassC
+    method methodC()
+    end method;
+end class;
+
+

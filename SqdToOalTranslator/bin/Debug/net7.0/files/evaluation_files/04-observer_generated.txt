@@ -1,0 +1,38 @@
+﻿class Client
+    method FirstMethod()
+        create object instance Veterinarian_inst of Veterinarian;
+        Veterinarian_inst.Register();
+        Veterinarian_inst.Register();
+        Veterinarian_inst.SetDate();
+        Veterinarian_inst.SetDate();
+    end method;
+end class;
+
+class Veterinarian
+    method Register()
+        create object instance Animal_inst of Animal;
+        Animal_inst.SetVaccinationDate();
+    end method;
+
+    method SetDate()
+        self.VaccinateAnimals();
+    end method;
+
+    method VaccinateAnimals()
+        for each Animal in self.RegisteredAnimals
+            create object instance Animal_inst of Animal;
+            Animal_inst.ReceiveVaccine();
+        end for;
+    end method;
+end class;
+
+class Animal
+    method SetVaccinationDate()
+    end method;
+
+    method ReceiveVaccine()
+        if (self.VaccinationDate ==  Date)
+        end if;
+    end method;
+end class;
+

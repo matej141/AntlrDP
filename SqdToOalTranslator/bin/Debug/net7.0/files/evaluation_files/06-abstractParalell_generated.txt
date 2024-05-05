@@ -1,0 +1,142 @@
+﻿class Client
+    method StartMethod()
+        create object instance Game_inst of Game;
+        Game_inst.CreateLevel();
+    end method;
+
+end class;
+
+class Game
+    method CreateLevel()
+        par
+            thread
+                self.CreateHumanArmy();
+            end thread;
+            thread
+                self.CreateElvenArmy();
+            end thread;
+            thread
+                self.CreateTrollArmy();
+            end thread;
+        end par;
+    end method;
+
+    method CreateHumanArmy()
+        create object instance HumanFactory_inst of HumanFactory;
+        HumanFactory_inst.CreateWarrior();
+        HumanFactory_inst.CreateWarrior();
+        HumanFactory_inst.CreateWarrior();
+        HumanFactory_inst.CreateRanger();
+        HumanFactory_inst.CreateRanger();
+        HumanFactory_inst.CreateMage();
+    end method;
+
+    method CreateElvenArmy()
+        create object instance ElvenFactory_inst of ElvenFactory;
+        ElvenFactory_inst.CreateWarrior();
+        ElvenFactory_inst.CreateRanger();
+        ElvenFactory_inst.CreateRanger();
+        ElvenFactory_inst.CreateRanger();
+        ElvenFactory_inst.CreateRanger();
+        ElvenFactory_inst.CreateMage();
+    end method;
+
+    method CreateTrollArmy()
+        create object instance TrollFactory_inst of TrollFactory;
+        TrollFactory_inst.CreateWarrior();
+        TrollFactory_inst.CreateWarrior();
+        TrollFactory_inst.CreateWarrior();
+        TrollFactory_inst.CreateWarrior();
+        TrollFactory_inst.CreateMage();
+    end method;
+end class;
+
+class HumanFactory
+    method CreateWarrior()
+        create object instance HumanWarrior_inst of HumanWarrior;
+        HumanWarrior_inst.HumanWarrior();
+    end method;
+
+    method CreateRanger()
+        create object instance HumanRanger_inst of HumanRanger;
+        HumanRanger_inst.HumanRanger();
+    end method;
+
+    method CreateMage()
+        create object instance HumanMage_inst of HumanMage;
+        HumanMage_inst.HumanMage();
+    end method;
+end class;
+
+class HumanWarrior
+    method HumanWarrior()
+    end method;
+end class;
+
+class HumanRanger
+    method HumanRanger()
+    end method;
+end class;
+
+class HumanMage
+    method HumanMage()
+    end method;
+end class;
+
+class ElvenFactory
+    method CreateWarrior()
+        create object instance ElvenWarrior_inst of ElvenWarrior;
+        ElvenWarrior_inst.ElvenWarrior();
+    end method;
+
+    method CreateRanger()
+        create object instance ElvenRanger_inst of ElvenRanger;
+        ElvenRanger_inst.ElvenRanger();
+    end method;
+
+    method CreateMage()
+        create object instance ElvenMage_inst of ElvenMage;
+        ElvenMage_inst.ElvenMage();
+    end method;
+end class;
+
+class ElvenWarrior
+    method ElvenWarrior()
+    end method;
+end class;
+
+class ElvenRanger
+    method ElvenRanger()
+    end method;
+end class;
+
+class ElvenMage
+    method ElvenMage()
+    end method;
+end class;
+
+class TrollFactory
+    method CreateWarrior()
+        create object instance TrollWarrior_inst of TrollWarrior;
+        TrollWarrior_inst.TrollWarrior();
+    end method;
+
+    method CreateMage()
+        create object instance TrollMage_inst of TrollMage;
+        TrollMage_inst.TrollMage();
+    end method;
+end class;
+
+class TrollWarrior
+    method TrollWarrior()
+    end method;
+end class;
+
+class TrollRanger
+end class;
+
+class TrollMage
+    method TrollMage()
+    end method;
+end class;
+

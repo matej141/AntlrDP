@@ -1,0 +1,35 @@
+﻿class Order
+    int[] items;
+    bool needsConfirmation;
+    method StartMethod()
+        for each line_item in items
+            if (line_item > 10000)
+                create object instance inst_Careful_ of Careful;
+                Careful_inst.dispatch();
+            else
+                create object instance inst_Regular of Regular;
+                Regular_inst.dispatch();
+            end if;
+	end for;
+        if (needsConfirmation)
+            create object instance inst_Messenger of Messenger;
+            Messenger_inst.confirm();
+        end if;
+    end method;
+end class;
+
+class Careful
+    method dispatch()
+    end method;
+end class;
+
+class Regular
+    method dispatch()
+    end method;
+end class;
+
+class Messenger
+    method confirm()
+    end method;
+end class;
+
