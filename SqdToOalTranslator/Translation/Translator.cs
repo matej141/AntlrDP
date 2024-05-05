@@ -16,14 +16,16 @@ public sealed class Translator
     public bool IsDiagramValid = true;
     private bool _firstStatementNeedsToBeHandled = true;
     private readonly bool _areSelfMessagesBlankMethods;
-    private const string InvalidDiagramTxt = "Sequence Diagram is Invalid";
+    public const string InvalidDiagramTxt = "Sequence Diagram is Invalid";
     private string _nameOfLastMethodBeforeStatement = "";
+    private CodeFilesGenerator CodeFilesGenerator { get; }
 
     public Translator(PreOalCode preOalCode, bool areSelfMessagesBlankMethods = true)
     {
         PreOalCode = preOalCode;
         _areSelfMessagesBlankMethods = areSelfMessagesBlankMethods;
         Translate();
+        CodeFilesGenerator = new CodeFilesGenerator(this);
     }
 
     private void Translate()
@@ -34,10 +36,10 @@ public sealed class Translator
         {
             FinishDiagramAsInvalid();
         }
-        
+
         // triedy z PreOalCodeElements konverutjeme do TranslationClasses
         TranslatePreOalClassesToTranslationClasses();
-        
+
         // prejdeme všetky predpripravené PreOAL elementy a preložíme ich postupne do OAL kódu
         foreach (var codeElement in PreOalCode.CodeElements)
         {
@@ -49,7 +51,7 @@ public sealed class Translator
                 return;
             }
         }
-        
+
         // na základe posledného elementu PreOAL elementov uzatvoríme konverziu do OAL kódu
         UpdateMethodsForLastCodeElement(PreOalCode.CodeElements[^1]);
         OrderMethodsInClasses();
@@ -680,7 +682,7 @@ public sealed class Translator
         while (indexOfLastStatementInElements > 0)
         {
             var previousElement = elements[indexOfLastStatementInElements - 1];
-            
+
             if (SomeOfTheAttributesOfStatementIsNotFulfilled(statement, previousElement)) break;
             var previousStatement = (Statement)previousElement;
             lastMethodInStatement = FindLastMethodCallInStatement(previousStatement);
@@ -865,160 +867,16 @@ public sealed class Translator
             _ => ""
         };
     }
-    
+
     // vytvorenie animačného súboru
     public AnimArchAnimation CreateAnimArchAnimationObject()
     {
-        var methodCodes = CreateAnimMethodsCodes();
-        return new AnimArchAnimation
-        {
-            Code = GetWholeCode(),
-            MethodsCodes = methodCodes,
-            StartClass = GetFirstClass(),
-            StartMethod = GetFirstMethod()
-        };
+        return CodeFilesGenerator.CreateAnimArchAnimationObject();
     }
 
-    private string GetFirstClass()
-    {
-        if (Classes.Count == 0)
-        {
-            return "";
-        }
-
-        return Classes.First().Name;
-    }
-
-    private string GetFirstMethod()
-    {
-        if (Classes.Count == 0)
-        {
-            return "";
-        }
-
-        if (Classes.First().Methods.Count == 0)
-        {
-            return "";
-        }
-
-        return Classes.First().Methods.First().Name;
-    }
-
-    private List<AnimationMethodCode> CreateAnimMethodsCodes()
-    {
-        var methodCodes = new List<AnimationMethodCode>();
-
-        foreach (var translationClass in Classes)
-        {
-            var animMethods = translationClass.Methods.Select(oalClassMethod => new AnimationMethod
-            {
-                Name = oalClassMethod.Name,
-                Code = oalClassMethod.Code
-            }).ToList();
-
-            if (animMethods.Count == 0)
-                continue;
-
-            methodCodes.Add(new AnimationMethodCode
-            {
-                Name = translationClass.Name,
-                Methods = animMethods
-            });
-        }
-
-        return methodCodes;
-    }
-
-    private string GetWholeCode()
-    {
-        var code = "";
-        foreach (var oalClass in Classes)
-        {
-            foreach (var translationMethod in oalClass.Methods)
-            {
-                code += translationMethod.Code;
-            }
-        }
-
-        return code;
-    }
-
-    // získanie súboru s OAL kódom (nie animačný súbor)
+    // získanie OAL kódu na vytvorenie txt súboru s OAL kódom (nie animačný súbor)
     public string GetCompleteOalCode()
     {
-        if (!IsDiagramValid)
-        {
-            return InvalidDiagramTxt;
-        }
-
-        var code = new StringBuilder();
-
-        foreach (var translationClass in Classes)
-        {
-            AppendLineWithIndent(code, $"class {translationClass.Name}", 0);
-            AppendConstructor(code, translationClass.Name);
-
-            foreach (var translationMethod in translationClass.Methods)
-            {
-                AppendLineWithIndent(code, $"method {translationMethod.Name}()", 1);
-                IndentAndAppendCodeLines(code, translationMethod.Code);
-                AppendLineWithIndent(code, "end method;", 1);
-                code.AppendLine();
-            }
-
-            AppendLineWithIndent(code, "end class;", 0);
-            code.AppendLine();
-        }
-
-        return code.ToString();
-    }
-
-    private void AppendConstructor(StringBuilder sb, string className)
-    {
-        var constructorTxt = "constructor " + className + "()";
-        AppendLineWithIndent(sb, constructorTxt, 1);
-        AppendLineWithIndent(sb, "end constructor;\n", 1);
-    }
-
-    private void IndentAndAppendCodeLines(StringBuilder sb, string code)
-    {
-        var lines = code.Split("\n");
-        var indentation = 2;
-
-        foreach (var line in lines)
-        {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-
-            if (line.Contains("elif") || line.Contains("else"))
-            {
-                AppendLineWithIndent(sb, line, indentation - 1);
-                continue;
-            }
-
-            if (line.Contains("end"))
-            {
-                indentation--;
-                AppendLineWithIndent(sb, line, indentation);
-                continue;
-            }
-
-            if (line.Contains("if ") || line.Contains("for ") || line.Contains("while ") || line.Contains("par") ||
-                line.Contains(
-                    "thread"))
-            {
-                AppendLineWithIndent(sb, line, indentation);
-                indentation++;
-                continue;
-            }
-
-            AppendLineWithIndent(sb, line, indentation);
-        }
-    }
-
-    private static void AppendLineWithIndent(StringBuilder sb, string line, int indentLevel)
-    {
-        var indent = new string(' ', indentLevel * 4);
-        sb.AppendLine($"{indent}{line}");
+        return CodeFilesGenerator.GetCompleteOalCode();
     }
 }
