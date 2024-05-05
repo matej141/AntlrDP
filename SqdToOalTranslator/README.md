@@ -27,8 +27,8 @@ Druhým parametrom sa definuje cesta ku výslednému JSON súboru, ktorý po ús
 Tretí parameter stanovuje cestu k textovému (txt) súboru súboru, ktorý bude obsahovať text OAL kódu.
 
 ### Cesta k súborom
-Príklady vstupných súborov definujúcich sekvenčné diagramy sa nachádzajú v priečinku [SqdToOalTranslator\bin\Debug\net7.0\files](SqdToOalTranslator\bin\Debug\net7.0\files).<br>
-Súbory s OAL kódmi, spomínané v kapitole o evaluácii v [texte práce](SqdToOalTranslator/Ciernik_Matej_DP.pdf), sa nachádzajú v priečinku [SqdToOalTranslator\bin\Debug\net7.0\files\evaluation_files](SqdToOalTranslator\bin\Debug\net7.0\files\evaluation_files).
+Príklady vstupných súborov definujúcich sekvenčné diagramy sa nachádzajú v priečinku [SqdToOalTranslator/bin/Debug/net7.0/files](SqdToOalTranslator/bin/Debug/net7.0/files).<br>
+Súbory s OAL kódmi, spomínané v kapitole o evaluácii v [texte práce](SqdToOalTranslator/Ciernik_Matej_DP.pdf), sa nachádzajú v priečinku [SqdToOalTranslator/bin/Debug/net7.0/files/evaluation_files](SqdToOalTranslator/bin/Debug/net7.0/files/evaluation_files).
 
 ### Časti zdrojového kódu
 Jednotlivé časti zdrojového kódu, spomínané v kapitole _2.1.3_ v [texte práce](SqdToOalTranslator/Ciernik_Matej_DP.pdf), sa nachádzajú v priečinkoch [SequenceDiagramElements](SqdToOalTranslator/SequenceDiagramElements), [PreOalCodeElements](SqdToOalTranslator/PreOalCodeElements) a [Translation](SqdToOalTranslator/Translation).
@@ -42,5 +42,5 @@ V priečinku [AntlrFiles](SqdToOalTranslator/AntlrFiles) sa nachádzajú všetky
 ### Testy
 Jednotkové testy, ktorými sme postupne testovali jednotlivé časti zdrojového kódu nášho riešenia, sa nachádzajú v súboroch [SequenceDiagramTests.cs](SqdToOalTranslatorTests/SequenceDiagramTests.cs), [PreOalCodeTests.cs](SqdToOalTranslatorTests/PreOalCodeTests.cs) a [TranslatorTests.cs](SqdToOalTranslatorTests/TranslatorTests.cs). Tieto súbory sú v priečinku [SqdToOalTranslatorTests](SqdToOalTranslatorTests).
 
-JSON súbory definujúce sekvenčné diagramy, ktoré využívajú naše testy, sa nachádzajú v priečinku [SqdToOalTranslatorTests\bin\Debug\net7.0\files](SqdToOalTranslatorTests\bin\Debug\net7.0\files).
+JSON súbory definujúce sekvenčné diagramy, ktoré využívajú naše testy, sa nachádzajú v priečinku [SqdToOalTranslatorTests/bin/Debug/net7.0/files](SqdToOalTranslatorTests/bin/Debug/net7.0/files).
 
