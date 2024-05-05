@@ -72,7 +72,6 @@
     <Content Include="bin\Debug\net7.0\files\OneHelloOneReturn.json" />
     <Content Include="bin\Debug\net7.0\files\OneLoopBeforeAfterMessages.json" />
     <Content Include="bin\Debug\net7.0\files\OnePar.json" />
-    <Content Include="README.md"/>
   </ItemGroup>
 
 </Project>
