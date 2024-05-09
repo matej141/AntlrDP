@@ -8,7 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Users/ciern/RiderProjects/ANTLR_DP/AntlrDP/AntlrDP/AntlrDP/SequenceDiagram.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
