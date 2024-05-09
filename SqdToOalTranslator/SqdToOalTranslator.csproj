@@ -39,12 +39,6 @@
     <Content Include="bin\Debug\net7.0\files\evaluation_files\05-abstractSequential_original.txt" />
     <Content Include="bin\Debug\net7.0\files\evaluation_files\06-abstractParalell_generated.txt" />
     <Content Include="bin\Debug\net7.0\files\evaluation_files\06-abstractParalell_original.txt" />
-    <Content Include="bin\Debug\net7.0\files\evaluation_files\diagrams\5_AbstractFactoryGameMany.json" />
-    <Content Include="bin\Debug\net7.0\files\evaluation_files\diagrams\6_AbstractFactoryGameParallel.json" />
-    <Content Include="bin\Debug\net7.0\files\evaluation_files\diagrams\1_ChainOfResponsibility.json" />
-    <Content Include="bin\Debug\net7.0\files\evaluation_files\diagrams\2_Mediator.json" />
-    <Content Include="bin\Debug\net7.0\files\evaluation_files\diagrams\4_ObserverVaccinationCase.json" />
-    <Content Include="bin\Debug\net7.0\files\evaluation_files\diagrams\3_FowlerUMLDistilled.json" />
     <Content Include="bin\Debug\net7.0\files\FowlerUMLDistilled.json" />
     <Content Include="bin\Debug\net7.0\files\Hello3ClassesWaterfall.json" />
     <Content Include="bin\Debug\net7.0\files\HelloMessage.json" />
