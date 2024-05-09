@@ -29,7 +29,6 @@ pair
    | specification
    | opaqueExpression
    | operand
-   | fragments
    | body
    | ownedElements
    ;
@@ -85,10 +84,6 @@ guard
     : '"guard"' ':' value
     ;
 
-fragments
-    : '"fragment"' ':' value
-    ;
-    
 specification
     : '"specification"' ':' value
     ;

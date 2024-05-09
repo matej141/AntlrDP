@@ -156,15 +156,7 @@ public class SequenceDiagramCustomVisitor : SequenceDiagramBaseVisitor<object>
     {
         var id = pairContexts.First(val => val.xmiId() != null).xmiId().value().GetText().Replace("\"", "");
         var guardId = GetGuardId(pairContexts);
-        var fragmentsContext =
-            pairContexts.First(val => val.fragments() != null).fragments().value().arr().value();
-        var fragments = new List<string>();
-        foreach (var fragment in fragmentsContext)
-        {
-            fragments.Add(fragment.obj().pair()[0]
-                .xmiIdRef().value().GetText().Replace("\"", ""));
-        }
-
+        
         var ownedElementsContext =
             pairContexts.First(val => val.ownedElements() != null).ownedElements().value().arr().value();
         var ownedElements = new List<string>();
@@ -175,7 +167,7 @@ public class SequenceDiagramCustomVisitor : SequenceDiagramBaseVisitor<object>
         }
         SequenceDiagram.IdsInOwnedElements.AddRange(ownedElements);
         return new InteractionOperand
-            { XmiId = id, InteractionConstraintId = guardId, Fragments = fragments, OwnedElements = ownedElements };
+            { XmiId = id, InteractionConstraintId = guardId, OwnedElements = ownedElements };
     }
 
     private static string GetGuardId(IEnumerable<SequenceDiagramParser.PairContext> pairContexts)
