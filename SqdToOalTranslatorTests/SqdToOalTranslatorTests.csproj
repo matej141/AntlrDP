@@ -7,7 +7,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>AntlrDPTests</RootNamespace>
+    <RootNamespace>SqdToOalTranslatorTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
